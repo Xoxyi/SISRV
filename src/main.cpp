@@ -131,9 +131,11 @@ int main()
         //update color
         float timeValue = glfwGetTime();
         float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+        //query for the location of the ourColor uniform using glGetUniformLocation
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         //shuold control if vertexColorLocation != -1
         glUseProgram(shaderProgram);
+        //set the uniform value
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
         glUseProgram(shaderProgram);
