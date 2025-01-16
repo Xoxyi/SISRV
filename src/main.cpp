@@ -93,6 +93,19 @@ int main()
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f, 0.0f,0.0f),
+        glm::vec3( 2.0f, 5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f, 3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f, 2.0f, -2.5f),
+        glm::vec3( 1.5f, 0.2f, -1.5f),
+        glm::vec3(-1.3f, 1.0f, -1.5f)
+    };
+
     //set up buffers
     unsigned int VBO, VAO;
     glGenBuffers(1, &VBO);
@@ -140,12 +153,9 @@ int main()
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         ourShader.use();
+        glBindVertexArray(VAO);
 
         //coordination system tranformation
-
-        //positioning the object in the world
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
         //coordinate as seen from the camera or viewer’s point of view
         glm::mat4 view = glm::mat4(1.0f);
@@ -156,17 +166,23 @@ int main()
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
         
-        //send the metrices to shader
-        int modelLoc = glGetUniformLocation(ourShader.ID, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
+        //send the matrix to shader
         int viewLoc = glGetUniformLocation(ourShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
         int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-        glBindVertexArray(VAO);
+        for(int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            ourShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwPollEvents();
