@@ -157,10 +157,13 @@ int main()
 
         //coordination system tranformation
 
-        //coordinate as seen from the camera or viewer’s point of view
-        glm::mat4 view = glm::mat4(1.0f);
-        // note that we’re translating the scene in the reverse direction
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+         // camera/view transformation
+        glm::mat4 view = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        float radius = 10.0f;
+        float camX = static_cast<float>(sin(glfwGetTime()) * radius);
+        float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
+        view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        ourShader.setMat4("view", view);
 
         //prospectic projection
         glm::mat4 projection;
