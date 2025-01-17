@@ -74,7 +74,7 @@ int main()
     // configure global opengl state
     glEnable(GL_DEPTH_TEST);
 
-    // build and compile our shader program
+    // build and compile our shaders program
     Shader lightingShader("shaders/texture.vs", "shaders/texture.fs");
     Shader lightCubeShader("shaders/texture.vs", "shaders/light.fs");
 
