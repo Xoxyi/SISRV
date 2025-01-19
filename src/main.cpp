@@ -152,7 +152,7 @@ int main()
 
     // normal attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
     //unbind buffer
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -218,6 +218,9 @@ int main()
 
         //pass light position to shader
         lightingShader.setVec3("lightPos", lightPos);
+
+        //pass camera position to shader
+        lightingShader.setVec3("viewPos", camera.Position); 
 
         //actual render
         glBindVertexArray(VAO);
