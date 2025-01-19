@@ -215,7 +215,8 @@ unsigned int Shader::get_location(const std::string &name) const
         return loc;
     //error location not found
     std::cerr << "ERROR::LOCATION_NOT_FOUND: " << name << std::endl;
-    exit(1);
+    return -1;
+    //exit(1);
 }
 
 #endif
