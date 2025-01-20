@@ -231,8 +231,6 @@ int main()
         //pass camera position to shader
         lightingShader.setVec3("viewPos", camera.Position); 
 
-
-        
         //pass light attributes to shader
         // directional light
         lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
