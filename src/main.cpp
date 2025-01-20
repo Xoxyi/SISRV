@@ -72,6 +72,8 @@ int main()
         return -1;
     }
 
+    stbi_set_flip_vertically_on_load(true);
+
     // configure global opengl state
     glEnable(GL_DEPTH_TEST);
 
