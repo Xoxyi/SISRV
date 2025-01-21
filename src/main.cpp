@@ -74,7 +74,7 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);  
-    //glEnable(GL_CULL_FACE);  
+    glEnable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
     // build and compile shaders
@@ -243,6 +243,7 @@ int main()
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         
+        glDisable(GL_CULL_FACE);
         // floor
         glBindVertexArray(planeVAO);
         glBindTexture(GL_TEXTURE_2D, floorTexture);
@@ -250,6 +251,7 @@ int main()
         shader.use();
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        glEnable(GL_CULL_FACE); 
         // cubes
         glBindVertexArray(cubeVAO);
         glActiveTexture(GL_TEXTURE0);
@@ -264,6 +266,7 @@ int main()
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);  
 
+        glDisable(GL_CULL_FACE);
         // windows (from furthest to nearest)
         glBindVertexArray(transparentVAO);
         glBindTexture(GL_TEXTURE_2D, glassTexture);
