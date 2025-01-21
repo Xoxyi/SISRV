@@ -1,18 +1,16 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <stb_image.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <shader_class.h>
 #include <camera_class.h>
+#include <model_class.h>
 
 #include <iostream>
 #include <math.h>
-#include "model.h"
 
 //initial window dimention and aspect ratio
 const unsigned int SCR_WIDTH = 800;
@@ -40,48 +38,34 @@ void processInput(GLFWwindow *window);
 //clear windows with a desidered color and reset old buffer
 void clear_window_buffer();
 
+// glfw: initialize and configure
+GLFWwindow* glfwInitialize(const char* windowName);
 
-unsigned int create_texture(char const *path, unsigned int wramMethod, unsigned int filter, unsigned int dataType);
+void gladInitialize();
 
 int main()
 {
-    // glfw: initialize and configure
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    
+    GLFWwindow* window = glfwInitialize("Learn OpenGL");
 
-    // glfw window creation 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-    if (window == NULL) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    gladInitialize();
 
-    //register callback function for mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-
-    // glad: load all OpenGL function pointers
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
     stbi_set_flip_vertically_on_load(true);
 
-    // configure global opengl state
+    // configure global opengl state (enabling test on z buffer)
     glEnable(GL_DEPTH_TEST);
 
     // build and compile our shaders program
     Shader shader("shaders/texture.vs", "shaders/texture.fs");
 
+    // load models
     Model backpack("assets/models/backpack/backpack.obj");
 
+    // draw in wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    //render loop
     while (!glfwWindowShouldClose(window)) {
 
         //take timing
@@ -94,24 +78,20 @@ int main()
 
         clear_window_buffer();
 
-        //model matrix
-        glm::mat4 model = glm::mat4(1.0f);
-        //projecton matrix
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        //view matrix
-        glm::mat4 view = camera.GetViewMatrix();
-
-        // activate shader
+        //enabling shader
         shader.use();
 
-        // pass projection matrix to shader (note that in this case it could change every frame)
+        //transformations matrix
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+
+        // pass matrix to shader
         shader.setMat4("projection", projection);
-
-        // pass camera/view transformation to shader
         shader.setMat4("view", view);
-
         shader.setMat4("model", model);
 
+        //actual drawing
         backpack.Draw(shader);
 
         glfwPollEvents();
@@ -177,31 +157,39 @@ void clear_window_buffer()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-unsigned int create_texture(char const *path, unsigned int wramMethod, unsigned int filter, unsigned int dataType)
+GLFWwindow* glfwInitialize(const char * windowName)
 {
-    unsigned int texture;
-    int width, height, nrChannels;
-    unsigned char *data;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wramMethod);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wramMethod);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-    // tell stb_image.h to flip loaded texture's on the y-axis.
-    stbi_set_flip_vertically_on_load(true);
-    data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, dataType, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cerr << "Failed to load texture" << std::endl;
+    // glfw: initialize and configure
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // glfw window creation 
+    GLFWwindow* window = glfwCreateWindow(800, 600, windowName, NULL, NULL);
+    if (window == NULL) {
+        std::cerr << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
         exit(1);
     }
-    stbi_image_free(data);
-    return texture;
+    glfwMakeContextCurrent(window);
+    
+    //register callback function for resize windows
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    //register callback function for mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    
+    return window;
+}
+
+void gladInitialize()
+{
+    // glad: load all OpenGL function pointers
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
+        exit(1);
+    }
 }
