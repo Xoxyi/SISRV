@@ -28,6 +28,7 @@ class Model
 {
 public:
 
+    std::vector<Mesh> meshes;
     Model(const char* path);
 
     void Draw(Shader& shader);
@@ -36,7 +37,6 @@ private:
 
     // model data 
     std::vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-    std::vector<Mesh>    meshes;
     std::string directory;
 
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
