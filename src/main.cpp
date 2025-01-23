@@ -38,8 +38,8 @@ int main()
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
@@ -78,7 +78,9 @@ int main()
 
     // build and compile shaders
     // -------------------------
-    Shader shader("shaders/texture.vs", "shaders/texture.fs");
+    Shader shaderBlue("shaders/texture.vs", "shaders/texture_blue.fs");
+    Shader shaderGreen("shaders/texture.vs", "shaders/texture_green.fs");
+    Shader shaderRed("shaders/texture.vs", "shaders/texture_red.fs");
     Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
 
 
@@ -128,27 +130,7 @@ int main()
      -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
-    float planeVertices[] = {
-        // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-
-         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-         5.0f, -0.5f, -5.0f,  2.0f, 2.0f								
-    };
-
-    float quadVertices[] = {
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
+    
 
     float skyboxVertices[] = {
         // positions          
@@ -206,7 +188,7 @@ int main()
     };
     
       
-        // cube VAO
+    // cube VAO
     unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
@@ -215,21 +197,11 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    //normal not needed
+    //glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
-    // plane VAO
-    unsigned int planeVAO, planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindVertexArray(0);
+
     // cubemap VAO
     unsigned int cubemapVAO, cubemapVBO;
     glGenVertexArrays(1, &cubemapVAO);
@@ -241,6 +213,17 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glBindVertexArray(0);
 
+    // UBO (uniform buffer object)
+    unsigned int uboMatrices;    //UBO for wiev and projection matrix
+    glGenBuffers(1, &uboMatrices);
+    
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    
+    //bind all buffer to binding point 0
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+
     
     // load textures
     // -------------
@@ -251,8 +234,12 @@ int main()
 
     // shader configuration
     // --------------------
-    shader.use();
-    shader.setInt("texture1", 0);
+
+    //projetion matrix costant 
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH/(float)SCR_HEIGHT, 0.1f, 100.0f);
+    glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     // render loop
     // -----------
@@ -273,29 +260,40 @@ int main()
         // render
         // ------
         
+        glm::mat4 view = camera.GetViewMatrix();	       
+        glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
         glDisable(GL_CULL_FACE);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// we're not using the stencil buffer now
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
         
         glEnable(GL_DEPTH_TEST);
-        shader.use();
-        glm::mat4 model = glm::mat4(1.0f);
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
-        shader.setVec3("cameraPos", camera.Position);
+        shaderBlue.use();
         
-        // cubes
+        glm::mat4 model;
+
+        // cube1
+        shaderBlue.use();
         glBindVertexArray(cubeVAO);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-        shader.setMat4("model", model);
+        model = glm::translate(model, glm::vec3(-1.0f, 1.0f, -1.0f));
+        shaderBlue.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //cube2
+        shaderGreen.use();
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-        shader.setMat4("model", model);
+        model = glm::translate(model, glm::vec3(1.0f, -1.0f, 0.0f));
+        shaderGreen.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);  
+
+        //cube2
+        shaderRed.use();
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f));
+        shaderRed.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);  
 
         glDisable(GL_CULL_FACE);
@@ -304,13 +302,9 @@ int main()
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
-        glm::mat4 skyboxView = glm::mat4(glm::mat3(view));
-        skyboxShader.setMat4("view", skyboxView);
-        skyboxShader.setMat4("projection", projection);
         glBindVertexArray(cubemapVAO);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -322,9 +316,7 @@ int main()
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &cubeVBO);
-    glDeleteBuffers(1, &planeVBO);
 
     glfwTerminate();
     return 0;
