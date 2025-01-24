@@ -1,4 +1,4 @@
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -13,8 +13,8 @@
 #include <math.h>
 
 //initial window dimention and aspect ratio
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1200;
+const unsigned int SCR_HEIGHT = 900;
 
 //initial camera settings
 Camera camera(glm::vec3(0.0f, 100.0f, 50.0f));
@@ -38,7 +38,12 @@ void processInput(GLFWwindow *window);
 //clear windows with a desidered color and reset old buffer
 void clear_window_buffer();
 
-unsigned int loadCubemap(std::vector<std::string> faces);
+unsigned int load_cubemap();
+unsigned int gen_skybox_VAO();
+void gen_trasformation(int amount, glm::vec3 *displacement, glm::vec2 *scale_rotation);
+void bind_rock_VAO(Model rock, int amount, glm::mat4 *modelMatrices);
+void update_rock_position(Model rock, int amount, glm::vec3 *displacement, glm::vec2 *scale_rotation);
+
 
 // glfw: initialize and configure
 GLFWwindow* glfwInitialize(const char* windowName);
@@ -67,137 +72,26 @@ int main()
     Model planet("assets/models/planet/planet.obj");
     Model rock("assets/models/rock/rock.obj");
 
-    std::vector<std::string> faces =
-    {
-        "right.jpg",
-        "left.jpg",
-        "top.jpg",
-        "bottom.jpg",
-        "front.jpg",
-        "back.jpg"
-    };
-    unsigned int cubemapTexture = loadCubemap(faces); 
 
-    float skyboxVertices[] = {
-        // positions          
-        -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
+    unsigned int cubemapTexture = load_cubemap();     
 
-        -1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-
-        -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f,
-        -1.0f, -1.0f,  1.0f,
-
-        -1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,
-
-        -1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f,  1.0f
-    };
-
-    // skybox VAO
-    unsigned int skyboxVAO, skyboxVBO;
-    glGenVertexArrays(1, &skyboxVAO);
-    glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    unsigned int skyboxVAO = gen_skybox_VAO();
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
 
+    int amount = 10000;
+    glm::vec3 *displacement;
+    glm::vec2 *scale_rotation;
+    displacement = new glm::vec3[amount];
+    scale_rotation = new glm::vec2[amount];
+    gen_trasformation(amount, displacement, scale_rotation);
+    update_rock_position(rock, amount, displacement, scale_rotation);
+    
+
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    unsigned int amount = 100000;
-    glm::mat4 *modelMatrices;
-    modelMatrices = new glm::mat4[amount];
-    srand(glfwGetTime()); // initialize random seed	
-    float radius = 150.0f;
-    float offset = 25.0f;
-    for(unsigned int i = 0; i < amount; i++)
-    {
-        glm::mat4 model = glm::mat4(1.0f);
-        // 1. translation: displace along circle with 'radius' in range [-offset, offset]
-        float angle = (float)i / (float)amount * 360.0f;
-        float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-        float x = sin(angle) * radius + displacement;
-        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-        float y = displacement * 0.4f; // keep height of field smaller compared to width of x and z
-        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-        float z = cos(angle) * radius + displacement;
-        model = glm::translate(model, glm::vec3(x, y, z));
-
-        // 2. scale: scale between 0.05 and 0.25f
-        float scale = (rand() % 20) / 100.0f + 0.05;
-        model = glm::scale(model, glm::vec3(scale));
-
-        // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
-        float rotAngle = (rand() % 360);
-        model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
-
-        // 4. now add to list of matrices
-        modelMatrices[i] = model;
-    }  
-
-    // vertex buffer object
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
     
-    for(unsigned int i = 0; i < rock.meshes.size(); i++)
-    {
-        unsigned int VAO = rock.meshes[i].VAO;
-        glBindVertexArray(VAO);
-        // vertex attributes
-        std::size_t vec4Size = sizeof(glm::vec4);
-        glEnableVertexAttribArray(3); 
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
-        glEnableVertexAttribArray(4); 
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
-        glEnableVertexAttribArray(5); 
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
-        glEnableVertexAttribArray(6); 
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
-
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
-        glVertexAttribDivisor(5, 1);
-        glVertexAttribDivisor(6, 1);
-
-        glBindVertexArray(0);
-    }
 
     //render loop
     while (!glfwWindowShouldClose(window)) {
@@ -215,10 +109,6 @@ int main()
 
         //enabling shader
         shader.use();
-
-        //shader.setFloat("time", glfwGetTime());
-
-        //transformations matrix
         
         // draw planet
         shader.use();
@@ -242,8 +132,11 @@ int main()
             rock.Draw(shader);
         }  */
 
+
+
         instanceShader.use();
 
+        update_rock_position(rock, amount, displacement, scale_rotation);
         instanceShader.setMat4("projection", projection);
         instanceShader.setMat4("view", view);
         for(unsigned int i = 0; i < rock.meshes.size(); i++)
@@ -338,7 +231,7 @@ GLFWwindow* glfwInitialize(const char * windowName)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // glfw window creation 
-    GLFWwindow* window = glfwCreateWindow(800, 600, windowName, NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, windowName, NULL, NULL);
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -366,12 +259,21 @@ void gladInitialize()
     }
 }
 
-unsigned int loadCubemap(std::vector<std::string> faces)
+unsigned int load_cubemap()
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
     stbi_set_flip_vertically_on_load(false);
+    std::vector<std::string> faces =
+    {
+        "right.jpg",
+        "left.jpg",
+        "top.jpg",
+        "bottom.jpg",
+        "front.jpg",
+        "back.jpg"
+    };
 
     int width, height, nrChannels;
     for (unsigned int i = 0; i < faces.size(); i++)
@@ -397,4 +299,142 @@ unsigned int loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     stbi_set_flip_vertically_on_load(true);
     return textureID;
-} 
+}
+
+unsigned int gen_skybox_VAO()
+{
+    float skyboxVertices[] = {
+        // positions          
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
+
+    // skybox VAO
+    unsigned int skyboxVAO, skyboxVBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    return skyboxVAO;
+}
+
+void gen_trasformation(int amount, glm::vec3 *displacement, glm::vec2 *scale_rotation)
+{
+    float offset = 15.0f;
+    srand(glfwGetTime()); // initialize random seed	
+    for(int i = 0; i < amount; i++)
+    {
+        // 1. translation: displace along circle with 'radius' in range [-offset, offset]
+        displacement[i].x = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        displacement[i].y = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        displacement[i].z = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+
+        // 2. scale: scale between 0.05 and 0.25f
+        scale_rotation[i].x = (rand() % 20) / 100.0f + 0.05;
+
+        // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+        scale_rotation[i].y  = (rand() % 360);
+
+    }
+}
+
+void update_rock_position(Model rock, int amount, glm::vec3 *displacement, glm::vec2 *scale_rotation)
+{
+    glm::mat4 *modelMatrices;
+    modelMatrices = new glm::mat4[amount];
+    float radius = 75.0f;
+    float angularSpeed = .5f;
+    for(int i = 0; i < amount; i++)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        float angle = (float)i / (float)amount * 360.0f + angularSpeed * glfwGetTime();
+        float x = sin(angle) * radius + displacement[i].x;
+        float y = displacement[i].y * 0.4f; // keep height of field smaller compared to width of x and z
+        float z = cos(angle) * radius + displacement[i].z;
+        model = glm::translate(model, glm::vec3(x, y, z));
+
+        // 2. scale: scale between 0.05 and 0.25f
+        model = glm::scale(model, glm::vec3(scale_rotation[i].x));
+
+        // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+        model = glm::rotate(model, scale_rotation[i].y, glm::vec3(0.4f, 0.6f, 0.8f));
+
+        // 4. now add to list of matrices
+        modelMatrices[i] = model;
+    }
+    bind_rock_VAO(rock, amount, modelMatrices);
+}
+
+void bind_rock_VAO(Model rock, int amount, glm::mat4 *modelMatrices)
+{
+    // vertex buffer object
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, amount * sizeof(glm::mat4), &modelMatrices[0], GL_STATIC_DRAW);
+    
+    for(unsigned int i = 0; i < rock.meshes.size(); i++)
+    {
+        unsigned int VAO = rock.meshes[i].VAO;
+        glBindVertexArray(VAO);
+        // vertex attributes
+        std::size_t vec4Size = sizeof(glm::vec4);
+        glEnableVertexAttribArray(3); 
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+        glEnableVertexAttribArray(4); 
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+        glEnableVertexAttribArray(5); 
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(6); 
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    }
+}
