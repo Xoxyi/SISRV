@@ -115,6 +115,7 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -3.0f, 0.0f));
         model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
+        model = glm::rotate(model, float(glfwGetTime()*0.2), glm::vec3(0.0f, 01.0f, 0.0f));
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 500.0f);
         glm::mat4 view = camera.GetViewMatrix();
 
@@ -385,7 +386,7 @@ void update_rock_position(Model rock, int amount, glm::vec3 *displacement, glm::
     glm::mat4 *modelMatrices;
     modelMatrices = new glm::mat4[amount];
     float radius = 75.0f;
-    float angularSpeed = .5f;
+    float angularSpeed = .2f;
     for(int i = 0; i < amount; i++)
     {
         glm::mat4 model = glm::mat4(1.0f);
