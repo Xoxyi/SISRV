@@ -81,11 +81,13 @@ int main()
 
     shader.use();
     shader.setInt("diffuseMap", 0);
-    shader.setInt("normalMap", 1);
+    shader.setInt("depthMap", 1);
+    shader.setInt("normalMap", 2);
 
 
-    unsigned int brickTexture = loadTexture("assets/textures/brickwall.jpg");
-    unsigned int brickNormalTexture = loadTexture("assets/textures/brickwall_normal.jpg");
+    unsigned int brickTexture = loadTexture("assets/textures/bricks2.jpg");
+    unsigned int brickNormalTexture = loadTexture("assets/textures/bricks2_normal.jpg");
+    unsigned int brickDispTexture = loadTexture("assets/textures/bricks2_disp.jpg");
 
 
     // draw in wireframe
@@ -121,11 +123,15 @@ int main()
         // set lighting uniforms
         shader.setVec3("lightPos", lightPos);
         shader.setVec3("viewPos", camera.Position);
+        shader.setFloat("height_scale", 0.1);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, brickTexture);
         glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, brickDispTexture);
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, brickNormalTexture);
+
 
         renderScene(shader);
 
@@ -280,20 +286,8 @@ void renderScene(const Shader& shader)
 {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(-1.2, 0.0,0.0));
-    model = glm::rotate(model, (float)glfwGetTime() * 0.2f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
     shader.setMat4("model", model);
-    shader.setBool("enableNormalMap", true);
     renderQuad();
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(+1.2, 0.0,0.0));
-    model = glm::rotate(model, (float)glfwGetTime() * 0.2f, glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-    shader.setMat4("model", model);
-    shader.setBool("enableNormalMap", false);
-    renderQuad();
-
-
-    
-    
 }
 
 unsigned int cubeVAO = 0;
