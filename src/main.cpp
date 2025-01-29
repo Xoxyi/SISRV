@@ -123,7 +123,7 @@ int main()
         // set lighting uniforms
         shader.setVec3("lightPos", lightPos);
         shader.setVec3("viewPos", camera.Position);
-        shader.setFloat("height_scale", 0.1);
+        shader.setFloat("height_scale", .1);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, brickTexture);
