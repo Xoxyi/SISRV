@@ -4,9 +4,10 @@ out vec4 FragColor;
 
 in VS_OUT {
     vec3 FragPos;
-    vec3 Normal;
     vec2 TexCoords;
-} fs_in;
+    vec3 Normal;
+    mat3 TBN;
+} fs_in; 
 
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
@@ -17,10 +18,12 @@ uniform bool enableNormalMap;
 
 void main()
 {           
-     // obtain normal from normal map in range [0,1]
+    // obtain normal (in tangent space) from normal map in range [0,1]
     vec3 normal = texture(normalMap, fs_in.TexCoords).rgb;
     // transform normal vector to range [-1,1]
-    normal = normalize(normal * 2.0 - 1.0);  // this normal is in tangent space
+    normal = normal * 2.0 - 1.0;   
+    // normal in world space
+    normal = normalize(fs_in.TBN * normal); 
     
     if(!enableNormalMap) {
         normal = normalize(fs_in.Normal);
