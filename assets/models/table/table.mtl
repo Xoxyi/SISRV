@@ -1,0 +1,26 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl Material
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd mat1/diffuse.png
+map_Bump mat1/normal.png
+map_Ks mat1/specular.png
+
+newmtl Material.002
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd mat2/diffuse.png
+map_Bump mat2/normal.png
+map_Ks mat2/specular.png

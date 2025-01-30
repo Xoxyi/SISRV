@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <vector>
 
 //initial window dimention and aspect ratio
 const unsigned int SCR_WIDTH = 1200;
@@ -24,7 +25,7 @@ bool bloomKeyPressed = false;
 float exposure = 1.0f;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 5.0f));
+Camera camera(glm::vec3(12.0f, 10.0f, 12.0f));
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -45,7 +46,7 @@ unsigned int loadTexture(char const * path);
 
 //reder objects
 void renderCube();
-void renderQuad(float offset_x, float offset_y);
+void renderQuad(float offset_x, float offset_y, float scale_x, float scale_y);
 void renderScene(const Shader &shader);
 
 // glfw: initialize and configure
@@ -129,37 +130,23 @@ int main()
     // load models
     // -----------
     Model backpack("assets/models/backpack/backpack.obj");
-    std::vector<glm::vec3> objectPositions;
-    objectPositions.push_back(glm::vec3(-3.0,  -0.5, -3.0));
-    objectPositions.push_back(glm::vec3( 0.0,  -0.5, -3.0));
-    objectPositions.push_back(glm::vec3( 3.0,  -0.5, -3.0));
-    objectPositions.push_back(glm::vec3(-3.0,  -0.5,  0.0));
-    objectPositions.push_back(glm::vec3( 0.0,  -0.5,  0.0));
-    objectPositions.push_back(glm::vec3( 3.0,  -0.5,  0.0));
-    objectPositions.push_back(glm::vec3(-3.0,  -0.5,  3.0));
-    objectPositions.push_back(glm::vec3( 0.0,  -0.5,  3.0));
-    objectPositions.push_back(glm::vec3( 3.0,  -0.5,  3.0));
+    Model room("assets/models/room/room.obj");
+    Model table("assets/models/table/table.obj");
+    Model chair("assets/models/chair/chair.obj");
+    
 
-
-
-    const unsigned int NR_LIGHTS = 32;
     std::vector<glm::vec3> lightPositions;
     std::vector<glm::vec3> lightColors;
-    srand(13);
-    for (unsigned int i = 0; i < NR_LIGHTS; i++)
-    {
-        // calculate slightly random offsets
-        float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-        float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
-        float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-        lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
-        // also calculate random color
-        float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-        float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-        float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-        lightColors.push_back(glm::vec3(rColor, gColor, bColor));
-    }
-
+    lightPositions.push_back(glm::vec3(0,15,0));
+    lightPositions.push_back(glm::vec3(5,6,5));
+    lightPositions.push_back(glm::vec3(-5,6,-5));
+    lightPositions.push_back(glm::vec3(5,6,-5));
+    lightPositions.push_back(glm::vec3(-5,6,5));
+    lightColors.push_back(glm::vec3(8,7,6));
+    lightColors.push_back(glm::vec3(3,2,1));
+    lightColors.push_back(glm::vec3(3,2,1));
+    lightColors.push_back(glm::vec3(3,2,1));
+    lightColors.push_back(glm::vec3(3,2,1));
 
     shaderLightingPass.use();
     shaderLightingPass.setInt("gPosition", 0);
@@ -188,36 +175,67 @@ int main()
         // 1. geometry pass: render scene's geometry/color data into gbuffer
         // -----------------------------------------------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-            glm::mat4 view = camera.GetViewMatrix();
-            glm::mat4 model = glm::mat4(1.0f);
-            gBufShader.use();
-            gBufShader.setMat4("projection", projection);
-            gBufShader.setMat4("view", view);
-            for (unsigned int i = 0; i < objectPositions.size(); i++)
-            {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, objectPositions[i]);
-                model = glm::scale(model, glm::vec3(0.5f));
-                gBufShader.setMat4("model", model);
-                backpack.Draw(gBufShader);
-            }
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 model = glm::mat4(1.0f);
+
+        gBufShader.use();
+        gBufShader.setMat4("projection", projection);
+        gBufShader.setMat4("view", view);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(7,2.25f,7));
+        model = glm::rotate(model, -90.0f * 2.0f * 3.1415f / 360.0f, glm::vec3(1.0f,0.0f,0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        backpack.Draw(gBufShader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0,5.1f,0));
+        model = glm::rotate(model, -90.0f * 2.0f * 3.1415f / 360.0f, glm::vec3(1.0f,0.0f,0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        backpack.Draw(gBufShader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(1.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        room.Draw(gBufShader);
+        
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0,0.25f,0));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        table.Draw(gBufShader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0,0.25f,-5));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        chair.Draw(gBufShader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0,0.25f,5));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        chair.Draw(gBufShader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-5,0.25f,0));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        chair.Draw(gBufShader);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(5,0.25f,0));
+        model = glm::scale(model, glm::vec3(1.0f));
+        gBufShader.setMat4("model", model);
+        chair.Draw(gBufShader);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glBindTexture(GL_TEXTURE_2D, gPosition);	
-        screenShader.use();
-        renderQuad(-.5,-.5);
-
-        glBindTexture(GL_TEXTURE_2D, gNormal);	
-        screenShader.use();
-        renderQuad(-.5,+.5);
-
-        glBindTexture(GL_TEXTURE_2D, gAlbedoSpec);	
-        screenShader.use();
-        renderQuad(+.5,-.5);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gPosition);
@@ -239,13 +257,13 @@ int main()
             shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
             shaderLightingPass.setVec3("lights[" + std::to_string(i) + "].Color", lightColors[i]);
             // update attenuation parameters and calculate radius
-            const float linear = 0.7f;
-            const float quadratic = 1.8f;
+            const float linear = 0.01f;
+            const float quadratic = 0.09f;
             shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].linear", linear);
             shaderLightingPass.setFloat("lights[" + std::to_string(i) + "].quadratic", quadratic);
         }
         shaderLightingPass.setVec3("viewPos", camera.Position);
-        renderQuad(+.5,+.5);
+        renderQuad(0,0,1,1);
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -434,16 +452,16 @@ void renderCube()
 // -----------------------------------------
 unsigned int quadVAO = 0;
 unsigned int quadVBO;
-void renderQuad(float offset_x, float offset_y)
+void renderQuad(float offset_x, float offset_y, float scale_x, float scale_y)
 {
     if (1)
     {
         float quadVertices[] = {
             // positions        // texture Coords
-            -.5f + offset_x,  .5f + offset_y, 0.0f, 0.0f, 1.0f,
-            -.5f + offset_x, -.5f + offset_y, 0.0f, 0.0f, 0.0f,
-             .5f + offset_x,  .5f + offset_y, 0.0f, 1.0f, 1.0f,
-             .5f + offset_x, -.5f + offset_y, 0.0f, 1.0f, 0.0f,
+            -1.0f * scale_x + offset_x,  1.0f * scale_y + offset_y, 0.0f, 0.0f, 1.0f,
+            -1.0f * scale_x + offset_x, -1.0f * scale_y + offset_y, 0.0f, 0.0f, 0.0f,
+             1.0f * scale_x + offset_x,  1.0f * scale_y + offset_y, 0.0f, 1.0f, 1.0f,
+             1.0f * scale_x + offset_x, -1.0f * scale_y + offset_y, 0.0f, 1.0f, 0.0f,
         };
         // setup plane VAO
         glGenVertexArrays(1, &quadVAO);

@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+const int MAX_BONE_INFLUENCE = 10;
+
 struct Vertex {
     // position
     glm::vec3 Position;
@@ -18,7 +20,6 @@ struct Vertex {
     glm::vec3 Normal;
     // texCoords
     glm::vec2 TexCoords;
-    /*
     // tangent
     glm::vec3 Tangent;
     // bitangent
@@ -27,7 +28,6 @@ struct Vertex {
 	int m_BoneIDs[MAX_BONE_INFLUENCE];
 	//weights from each bone
 	float m_Weights[MAX_BONE_INFLUENCE];
-    */
 };
 
 struct Texture {
@@ -93,7 +93,7 @@ void Mesh::setupMesh()
     // vertex texture coords
     glEnableVertexAttribArray(2);	
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
-    /*
+    
     // vertex tangent
     glEnableVertexAttribArray(3);
     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
@@ -107,7 +107,7 @@ void Mesh::setupMesh()
     // weights
     glEnableVertexAttribArray(6);
     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
-    */
+    
     glBindVertexArray(0);
 }
 
