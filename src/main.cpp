@@ -183,6 +183,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         hdrShader.use();
         hdrShader.setBool("hdr", hdr);
+        hdrShader.setFloat("exposure", 0.5);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, colorBuffer);
         renderQuad();
@@ -246,7 +247,7 @@ void processInput(GLFWwindow *window)
     {
         shadowsKeyPressed = false;
     }
-    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !shadowsKeyPressed)
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !hdrKeyPressed)
     {
         hdr = !hdr;
         hdrKeyPressed = true;
