@@ -72,14 +72,25 @@ int main()
 
     // configure global opengl state (enabling test on z buffer)
     glEnable(GL_DEPTH_TEST);
+
+    //textures;
+    unsigned int albedo = loadTexture("assets/textures/metal/albedo.png");
+    unsigned int normal = loadTexture("assets/textures/metal/normal.png");
+    unsigned int metallic = loadTexture("assets/textures/metal/metallic.png");
+    unsigned int roughness = loadTexture("assets/textures/metal/roughness.png");
+    unsigned int ao = loadTexture("assets/textures/metal/ao.png");
     
     // build and compile shaders
     // -------------------------
     Shader shader("shaders/pbr.vs", "shaders/pbr.fs");
+    shader.use();
+    shader.setInt("albedoMap", 0);
+    shader.setInt("normalMap", 1);
+    shader.setInt("metallicMap", 2);
+    shader.setInt("roughnessMap", 3);
+    shader.setInt("aoMap", 4);
 
     shader.use();
-    shader.setVec3("albedo", 0.5f, 0.0f, 0.0f);
-    shader.setFloat("ao", 1.0f);
 
     // lights
     // ------
@@ -105,8 +116,8 @@ int main()
     shader.use();
     shader.setMat4("projection", projection);
 
-    while (!glfwWindowShouldClose(window)) {
-
+    while (!glfwWindowShouldClose(window))
+    {
         // per-frame time logic
         // --------------------
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -127,21 +138,27 @@ int main()
         shader.setMat4("view", view);
         shader.setVec3("camPos", camera.Position);
 
-        // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns respectively
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, albedo);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, normal);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, metallic);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, roughness);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, ao);
+
+        // render rows*column number of spheres with material properties defined by textures (they all have the same material properties)
         glm::mat4 model = glm::mat4(1.0f);
         for (int row = 0; row < nrRows; ++row)
         {
-            shader.setFloat("metallic", (float)row / (float)nrRows);
             for (int col = 0; col < nrColumns; ++col)
             {
-                // we clamp the roughness to 0.05 - 1.0 as perfectly smooth surfaces (roughness of 0.0) tend to look a bit off
-                // on direct lighting.
-                shader.setFloat("roughness", glm::clamp((float)col / (float)nrColumns, 0.05f, 1.0f));
-
                 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(
-                    (col - (nrColumns / 2)) * spacing,
-                    (row - (nrRows / 2)) * spacing,
+                    (float)(col - (nrColumns / 2)) * spacing,
+                    (float)(row - (nrRows / 2)) * spacing,
                     0.0f
                 ));
                 shader.setMat4("model", model);
@@ -156,7 +173,6 @@ int main()
         for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
         {
             glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
-            newPos = lightPositions[i];
             shader.setVec3("lightPositions[" + std::to_string(i) + "]", newPos);
             shader.setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
 
@@ -168,9 +184,10 @@ int main()
             renderSphere();
         }
 
-
-        glfwPollEvents();
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
 
