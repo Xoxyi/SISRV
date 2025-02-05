@@ -1,0 +1,13 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl UtensilsJar001_1K
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd /home/dadi/Poliigon/Library/UtensilsJar001/UtensilsJar001_COL_1K.jpg
+map_Ks /home/dadi/Poliigon/Library/UtensilsJar001/UtensilsJar001_REFL_1K.jpg
+map_Bump -bm 1.000000 /home/dadi/Poliigon/Library/UtensilsJar001/UtensilsJar001_NRM_1K.png

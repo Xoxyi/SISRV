@@ -22,13 +22,18 @@ public:
     std::string type;
     std::string path;
 
+    void asd();
+
     Texture(const char *path, const std::string &directory, bool gammaCorrection, int wrapMethod = GL_REPEAT);
 
     Texture(const char *path, const std::string &directory, std::string type, bool gammaCorrection, int wrapMethod = GL_REPEAT);
 };
 
-Texture::Texture(const char *path, const std::string &directory, bool gammaCorrection, int wrapMethod)
+void Texture::asd() {std::cout<<"path: "<<path<<std::endl;}
+
+Texture::Texture(const char *path, const std::string &directory, bool gammaCorrection, int wrapMethod) : path(path)
 {
+
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
 
@@ -74,14 +79,12 @@ Texture::Texture(const char *path, const std::string &directory, bool gammaCorre
         std::cerr << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-
     this->id = textureID;
-    this->path = path;
 }
 
-Texture::Texture(const char *path, const std::string &directory, std::string type, bool gammaCorrection, int wrapMethod) : type(type)
+Texture::Texture(const char *path, const std::string &directory, std::string type, bool gammaCorrection, int wrapMethod) : Texture::Texture(path, directory, gammaCorrection, wrapMethod)
 {
-    Texture(path, directory, gammaCorrection, wrapMethod);
+    this->type=type;
 }
 
 #endif
