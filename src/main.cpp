@@ -16,13 +16,10 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
+#include <object_class.h>
 
-//initial window dimention and aspect ratio
-const unsigned int SCR_WIDTH = 1200;
-const unsigned int SCR_HEIGHT = 900;
 
 // camera
-Camera camera(glm::vec3(0.0f, 2.0f, 5.0f));
 float lastX = (float)SCR_WIDTH / 2.0;
 float lastY = (float)SCR_HEIGHT / 2.0;
 bool firstMouse = true;
@@ -69,9 +66,9 @@ int main()
     // -------------------------
     Shader shader("shaders/texture.vs", "shaders/texture.fs");
 
-    Model cube = Model::GenCube();
-    Model sphere = Model::GenSphere();
-    Model quad = Model::GenQuad();
+    Model zaino = Model( "assets/models/backpack/backpack.obj" );
+
+    Object zainoObj = Object{ zaino,  glm::translate(glm::mat4(1), glm::vec3(-4,0,0)) };
 
     shader.use();
 
@@ -93,26 +90,7 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glEnable(GL_CULL_FACE);
-
-        shader.use();
-        shader.setMat4("view", camera.GetViewMatrix());
-        //shader.setVec3("camPos", camera.Position);
-        shader.setMat4("projection", glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f));
-
-        shader.setMat4("model", glm::mat4(1.0f));
-
-        cube.Draw(shader);
-    
-
-        shader.setMat4("model", glm::translate(glm::mat4(1), glm::vec3(2,0,0)));
-        sphere.Draw(shader);
-
-        glDisable(GL_CULL_FACE);
-
-        shader.setMat4("model", glm::translate(glm::mat4(1), glm::vec3(-2,0,0)));
-        quad.Draw(shader);
-        
+        zainoObj.Draw(shader);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

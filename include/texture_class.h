@@ -11,10 +11,6 @@
 #include <iostream>
 #include <string>
 
-
-
-
-
 class Texture {
 public:
 
@@ -22,14 +18,14 @@ public:
     std::string type;
     std::string path;
 
-    void asd();
 
     Texture(const char *path, const std::string &directory, bool gammaCorrection, int wrapMethod = GL_REPEAT);
 
     Texture(const char *path, const std::string &directory, std::string type, bool gammaCorrection, int wrapMethod = GL_REPEAT);
+
+    Texture(unsigned int width, unsigned int height, unsigned int internlFormat, unsigned int externalFormat, unsigned int storageType);
 };
 
-void Texture::asd() {std::cout<<"path: "<<path<<std::endl;}
 
 Texture::Texture(const char *path, const std::string &directory, bool gammaCorrection, int wrapMethod) : path(path)
 {
@@ -59,9 +55,10 @@ Texture::Texture(const char *path, const std::string &directory, bool gammaCorre
             internalFormat = gammaCorrection? GL_SRGB_ALPHA : GL_RGBA;
 
         }
-        else
+        else {
             format = -1; //error
             internalFormat = -1; //error
+        }
 
 
         glBindTexture(GL_TEXTURE_2D, textureID);
@@ -85,6 +82,18 @@ Texture::Texture(const char *path, const std::string &directory, bool gammaCorre
 Texture::Texture(const char *path, const std::string &directory, std::string type, bool gammaCorrection, int wrapMethod) : Texture::Texture(path, directory, gammaCorrection, wrapMethod)
 {
     this->type=type;
+}
+
+inline Texture::Texture(unsigned int width, unsigned int height, unsigned int internlFormat, unsigned int externalFormat, unsigned int storageType)
+{
+    unsigned int textureID;
+    // position color buffer
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, internlFormat, width, height, 0, externalFormat, storageType, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    this->id = textureID;
 }
 
 #endif

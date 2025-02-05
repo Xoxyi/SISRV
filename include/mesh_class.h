@@ -138,7 +138,12 @@ void Mesh::Draw(Shader &shader)
             number = std::to_string(metalnessNr++);
         else if(name == "texture_roughness")
             number = std::to_string(roughnessNr++);
-            glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+
+         // now set the sampler to the correct texture unit
+         glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+         // and finally bind the texture
+         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
     // draw mesh
     glBindVertexArray(VAO);

@@ -6,11 +6,13 @@ in VS_OUT {
     vec2 TexCoords;
 } fs_in;
 
+uniform sampler2D texture_diffuse1;
+
 out vec4 FragColor;
 
 void main()
 {           
-    vec3 color = vec3(.5,.2,.3);
+    vec3 color = texture(texture_diffuse1, fs_in.TexCoords).rgb;
     vec3 normal = normalize(fs_in.Normal);
     // ambient
     vec3 ambient = 0.1 * color;
@@ -25,5 +27,5 @@ void main()
     
     lighting += result;
 
-    FragColor = vec4(ambient + lighting, 1.0);
+    FragColor = vec4(color, 1.0);
 }

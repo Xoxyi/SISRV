@@ -187,7 +187,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "texture_roughness");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-
     
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
