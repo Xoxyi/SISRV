@@ -1,3 +1,4 @@
+#include "frame_buffer_class.h"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
@@ -17,6 +18,7 @@
 #include <math.h>
 #include <vector>
 #include <object_class.h>
+#include <g_buffer_class.h>
 
 
 // camera
@@ -65,6 +67,8 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader shader("shaders/texture.vs", "shaders/texture.fs");
+
+    
 
     Model zaino = Model( "assets/models/backpack/backpack.obj" );
 
