@@ -100,16 +100,14 @@ void FrameBuffer::addStencilAttachment() {
 	renderBufferAttachments[GL_STENCIL_ATTACHMENT] = rboStencil;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+
 void FrameBuffer::updateAttachment(std::vector<unsigned int> indices) {
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
-	/*unsigned int *attachments = (unsigned int*)(malloc(indices.size() * sizeof(unsigned int)));
+	unsigned int *attachments = (unsigned int*)(malloc(indices.size() * sizeof(unsigned int)));
 	for(unsigned int i = 0; i < indices.size(); i++) {
 		attachments[i] = GL_COLOR_ATTACHMENT0 + indices[i];
 	}
-	glDrawBuffers(indices.size(), attachments);*/
-	
-    glDrawBuffers(4, attachments);
+	glDrawBuffers(indices.size(), attachments);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
