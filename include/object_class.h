@@ -1,14 +1,17 @@
 #ifndef OBJECT_CLASS_H
 #define OBJECT_CLASS_H
 
-#include <model_class.h>
-#include <camera_class.h>
+#include "glm/ext/matrix_float4x4.hpp"
+#include <cstddef>
+#include "model_class.h"
+#include "camera_class.h"
 
 class Object
 {
 public:
-	glm::mat4 transform;
+
 	Model &model;
+	glm::mat4 transform;
 
 	Object(Model &model, glm::mat4 transform);
 

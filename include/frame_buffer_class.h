@@ -1,6 +1,7 @@
 #ifndef FRAME_BUFFER_H
 #define FRAME_BUFFER_H
 
+#include <cstdlib>
 #include <vector>
 #include "texture_class.h"
 #include <map>
@@ -22,6 +23,9 @@ public:
 	void addDepthAttahcment(Texture *depthBuffer);
 	void addStencilAttachment();
 	void updateAttachment(std::vector<unsigned int> indices);
+	int checkCompleteness();
+	void enable();
+	void disable();
 	
 };
 
@@ -44,7 +48,7 @@ FrameBuffer::FrameBuffer(Texture *colorBuffer, Texture *depthbuffer, bool stenci
 			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 		renderBufferAttachments[GL_STENCIL_ATTACHMENT] = rboStencil;
 	}
-
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 FrameBuffer::FrameBuffer() {
@@ -57,6 +61,7 @@ FrameBuffer::FrameBuffer(Texture *colorBuffer) {
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer->id, 0);
 	textureAttachments[GL_COLOR_ATTACHMENT0] = colorBuffer;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void FrameBuffer::addColorAttchment(Texture *colorBuffer, unsigned int index) {
@@ -64,12 +69,24 @@ void FrameBuffer::addColorAttchment(Texture *colorBuffer, unsigned int index) {
 	unsigned int attachment = GL_COLOR_ATTACHMENT0 + index;
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, colorBuffer->id, 0);
 	textureAttachments[attachment] = colorBuffer;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::addDepthAttahcment(Texture *depthBuffer) {
+/*void FrameBuffer::addDepthAttahcment(Texture *depthBuffer) {
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer->id, 0);
 	textureAttachments[GL_DEPTH_ATTACHMENT] = depthBuffer;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}*/
+
+void FrameBuffer::addDepthAttahcment(Texture *depthBuffer) {
+	glBindFramebuffer(GL_FRAMEBUFFER, ID);
+	unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void FrameBuffer::addStencilAttachment() {
@@ -80,14 +97,41 @@ void FrameBuffer::addStencilAttachment() {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, SCR_WIDTH, SCR_HEIGHT);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboStencil);
 	renderBufferAttachments[GL_STENCIL_ATTACHMENT] = rboStencil;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
+unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
 void FrameBuffer::updateAttachment(std::vector<unsigned int> indices) {
-	unsigned int attachments[indices.size()];
-	for(int i = 0; i < indices.size(); i++) {
+	glBindFramebuffer(GL_FRAMEBUFFER, ID);
+	/*unsigned int *attachments = (unsigned int*)(malloc(indices.size() * sizeof(unsigned int)));
+	for(unsigned int i = 0; i < indices.size(); i++) {
 		attachments[i] = GL_COLOR_ATTACHMENT0 + indices[i];
 	}
-	glDrawBuffers(indices.size(), attachments);
+	glDrawBuffers(indices.size(), attachments);*/
+	
+    glDrawBuffers(4, attachments);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+int FrameBuffer::checkCompleteness()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, ID);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			return -1;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return 1;
+}
+
+void FrameBuffer::enable()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, ID);
+}
+
+void FrameBuffer::disable()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 #endif

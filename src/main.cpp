@@ -2,6 +2,7 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
+#include "lighting_pass_class.h"
 #include <cstdio>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -66,17 +67,22 @@ int main()
     
     // build and compile shaders
     // -------------------------
-    Shader shader("shaders/texture.vs", "shaders/texture.fs");
+    Shader geometryShader("shaders/g_buffer.vs", "shaders/g_buffer.fs");
+    Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
 
+    Model zainoMod = Model( "assets/models/backpack/backpack.obj");
+
+    Object zaino = Object{zainoMod,  glm::translate(glm::mat4(1), glm::vec3(0,0,0))};
+
+    std::vector<Object> objects;
     
+    objects.push_back(zaino);
 
-    Model zaino = Model( "assets/models/backpack/backpack.obj" );
-
-    Object zainoObj = Object{ zaino,  glm::translate(glm::mat4(1), glm::vec3(-4,0,0)) };
-
-    shader.use();
-
+    GBuffer gBuffer = GBuffer();
+    LightingPass lightingPass = LightingPass(&gBuffer);
     
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
@@ -91,10 +97,18 @@ int main()
 
         // render
         // ------
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        zainoObj.Draw(shader);
+        gBuffer.geometryPass(objects, geometryShader);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        lightingPass.lightingPass(lightingShader);
+
+        zaino.Draw(geometryShader);
+
+        
+
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

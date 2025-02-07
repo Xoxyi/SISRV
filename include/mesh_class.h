@@ -22,13 +22,13 @@ struct Vertex {
     // texCoords
     glm::vec2 TexCoords;
     // tangent
-    glm::vec3 Tangent;
+    glm::vec3 Tangent = glm::vec3(0);
     // bitangent
-    glm::vec3 Bitangent;
+    glm::vec3 Bitangent = glm::vec3(0);
 	//bone indexes which will influence this vertex
-	int m_BoneIDs[MAX_BONE_INFLUENCE];
+	int m_BoneIDs[MAX_BONE_INFLUENCE] = {};
 	//weights from each bone
-	float m_Weights[MAX_BONE_INFLUENCE];
+	float m_Weights[MAX_BONE_INFLUENCE] = {};
 };
 
 class Mesh {
