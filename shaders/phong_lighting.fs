@@ -29,7 +29,7 @@ layout (std140, binding = 2) uniform Lights{
 void main()
 {  
     // retrieve data from gbuffer
-    float type = texture(gReflection, TexCoords).a;
+    float type = texture(gAlbedo, TexCoords).a;
 
     if(type >= 0.2)
         discard;

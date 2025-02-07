@@ -31,6 +31,6 @@ void main()
     // store specular intensity in gAlbedoSpec's alpha component
     gReflection.r = texture(texture_diffuse1, fs_in.TexCoords).r;
 
-    gReflection.a = type;
+    gAlbedo.a = type;
 
 }

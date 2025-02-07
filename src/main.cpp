@@ -72,6 +72,7 @@ int main()
     Shader objGeometryShader("shaders/obj_geometry.vs", "shaders/obj_geometry.fs");
     Shader lightGeometryShader("shaders/light_geometry.vs", "shaders/light_geometry.fs");
     Shader phongLightingShader("shaders/lighting.vs", "shaders/phong_lighting.fs");
+    //Shader pbrLightingShader("shaders/lighting.vs", "shaders/pbr_lighting.fs");
     Shader lightLightingShader("shaders/lighting.vs", "shaders/light_lighting.fs");
 
 

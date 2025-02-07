@@ -49,9 +49,6 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, gBuffer->albedo.id);
     lightShader.setInt("gAlbedo", 0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, gBuffer->reflection.id);
-    lightShader.setInt("gReflection", 1);
     quad.Draw(lightShader);
 }
 

@@ -11,5 +11,5 @@ uniform float type;
 void main()
 {             
     gAlbedo.rgb = color;
-    gReflection.a = type;
+    gAlbedo.a = type;
 }  
