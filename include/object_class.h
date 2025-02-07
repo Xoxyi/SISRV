@@ -15,7 +15,7 @@ public:
 
 	Object(Model &model, glm::mat4 transform);
 
-	void Draw(Shader& shader);
+	void Draw(Shader& shader, float type = -1.0f);
 
 private:
 
@@ -23,12 +23,14 @@ private:
 
 Object::Object(Model &model, glm::mat4 transform) : model(model), transform(transform){}
 
-void Object::Draw(Shader& shader)
+void Object::Draw(Shader& shader, float type)
 {
     shader.use();
     shader.setMat4("view", camera.GetViewMatrix());
     shader.setMat4("projection", camera.GetProjectionMatrix());
 	shader.setMat4("model", transform);
+	if(type >= 0)
+		shader.setFloat("type", type);
     model.Draw(shader);
 }
 

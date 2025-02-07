@@ -30,6 +30,7 @@ public:
 
     std::vector<Mesh> meshes;
     Model(const char* path, bool gamma = false);
+    Model(const Model& model) ;
 
 
     void Draw(Shader& shader);
@@ -66,6 +67,13 @@ private:
 Model::Model(const char* path, bool gamma) : gammaCorrection(gamma)
 {
     loadModel(path);
+}
+
+Model::Model(const Model& model) {
+    meshes = model.meshes;
+    textures_loaded = model.textures_loaded;
+    directory = model.directory;
+    gammaCorrection = model.gammaCorrection;
 }
 
 void Model::Draw(Shader& shader)
@@ -175,17 +183,17 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
     textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     // 3. normal maps
-    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
+    std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
     textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     // 4. height maps
-    std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    //std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
+    //textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     std::vector<Texture> metalnessMap = loadMaterialTextures(material, aiTextureType_METALNESS, "texture_metalness");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    textures.insert(textures.end(), metalnessMap.begin(), metalnessMap  .end());
 
     std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS, "texture_roughness");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+    textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
 
     
     // return a mesh object created from the extracted mesh data

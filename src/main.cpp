@@ -20,6 +20,7 @@
 #include <vector>
 #include <object_class.h>
 #include <g_buffer_class.h>
+#include <point_light_class.h>
 
 
 // camera
@@ -69,14 +70,22 @@ int main()
     // -------------------------
     Shader geometryShader("shaders/g_buffer.vs", "shaders/g_buffer.fs");
     Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
+    Shader lightShader("shaders/lightGeometry.vs", "shaders/lightGeometry.fs");
+    Shader lightLightingShader("shaders/lighting.vs", "shaders/lightLighting.fs");
 
     Model zainoMod = Model( "assets/models/backpack/backpack.obj");
 
-    Object zaino = Object{zainoMod,  glm::translate(glm::mat4(1), glm::vec3(0,0,0))};
+    Object zaino = Object{zainoMod, glm::translate(glm::mat4(1), glm::vec3(-2,0,2))};
 
     std::vector<Object> objects;
-    
     objects.push_back(zaino);
+
+    std::vector<PointLight> pointLights;
+    pointLights.emplace_back(glm::vec3(1.0, 1.0, 1.0), glm::vec3(1.0, .7, .0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(1.0, 1.0, 1.0), 1.0f, .0f, .0f);
+    
+    Scene scene(objects, objects, pointLights);
+
 
     GBuffer gBuffer = GBuffer();
     LightingPass lightingPass = LightingPass(&gBuffer);
@@ -99,17 +108,14 @@ int main()
         // ------
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        gBuffer.geometryPass(objects, geometryShader);
+        gBuffer.geometryPass(scene, geometryShader, lightShader);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         lightingPass.lightingPass(lightingShader);
+        lightingPass.lightingPass(lightLightingShader);
 
-        zaino.Draw(geometryShader);
-
-        
-
-
+        //zaino.Draw(geometryShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

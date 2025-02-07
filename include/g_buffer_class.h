@@ -8,6 +8,7 @@
 #include "texture_class.h"
 #include <iostream>
 #include <vector>
+#include <scene_class.h>
 
 class GBuffer
 {
@@ -21,7 +22,7 @@ public:
 
     GBuffer();
 
-    void geometryPass(std::vector<Object> &objects, Shader &shader);
+    void geometryPass(Scene& scene, Shader &phongShader, Shader& lightShader);
 
 };
 
@@ -43,13 +44,12 @@ GBuffer::GBuffer() :    buffer(),
     buffer.checkCompleteness();
 }
 
-void GBuffer::geometryPass(std::vector<Object> &objects, Shader &shader)
+void GBuffer::geometryPass(Scene& scene, Shader &phongShader, Shader& lightShader)
 {
     buffer.enable();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for (auto &object : objects) {
-        object.Draw(shader);
-    }
+    scene.DrawPhong(phongShader);
+    scene.DrawLight(lightShader);
     buffer.disable();
 }
 
