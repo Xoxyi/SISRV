@@ -1,0 +1,18 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl TeapotSilver001_1K
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd texture/TeapotSilver001_COL_1K_METALNESS.jpg
+map_Pm texture/TeapotSilver001_METALNESS_1K_METALNESS.jpg
+map_Pr texture/TeapotSilver001_ROUGHNESS_1K_METALNESS.jpg
+map_Bump -bm 1.000000 texture/TeapotSilver001_NRM_1K_METALNESS.jpg
