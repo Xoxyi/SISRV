@@ -2,6 +2,7 @@
 #define FRAME_BUFFER_H
 
 #include <cstdlib>
+#include <iostream>
 #include <vector>
 #include "texture_class.h"
 #include <map>

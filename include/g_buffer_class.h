@@ -41,17 +41,12 @@ GBuffer::GBuffer() :    buffer(),
     buffer.addDepthAttahcment(&deph);
     buffer.updateAttachment(std::vector<unsigned int>{0,1,2,3});
     buffer.checkCompleteness();
-    std::cout << "---------" << std::endl;
-    std::cout << position.id << std::endl;
-    std::cout << normal.id << std::endl;
-    std::cout << albedo.id << std::endl;
-    std::cout << reflection.id << std::endl;
-    std::cout << deph.id << std::endl;
 }
 
 void GBuffer::geometryPass(std::vector<Object> &objects, Shader &shader)
 {
     buffer.enable();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for (auto &object : objects) {
         object.Draw(shader);
     }

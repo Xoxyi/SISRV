@@ -17,20 +17,21 @@ public:
     GBuffer *gBuffer;
     LightingPass(GBuffer *gBuffer);
     void lightingPass(Shader &shader);
+    Model quad;
 
 };
 
-LightingPass::LightingPass(GBuffer *gBuffer) : gBuffer(gBuffer) {}
+LightingPass::LightingPass(GBuffer *gBuffer) : gBuffer(gBuffer), quad(Model::GenQuad()){}
+
 
 void LightingPass::lightingPass(Shader &shader)
 {
     shader.use();
-    Texture tex = Texture("assets/textures/wood.png", ".", true);
+    //Texture tex = Texture("assets/textures/wood.png", ".", true);
     glActiveTexture(GL_TEXTURE0);
 
     glBindTexture(GL_TEXTURE_2D, gBuffer->position.id);
 
-    Model quad = Model::GenQuad();
     shader.setInt("gPosition", 0);
     quad.Draw(shader);
 }

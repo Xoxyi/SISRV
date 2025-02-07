@@ -94,7 +94,6 @@ inline Texture::Texture(unsigned int width, unsigned int height, unsigned int in
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     this->id = textureID;
-    std::cout<<"id: " << id << std::endl;
 }
 
 #endif
