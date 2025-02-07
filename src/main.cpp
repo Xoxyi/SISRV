@@ -68,10 +68,12 @@ int main()
     
     // build and compile shaders
     // -------------------------
-    Shader geometryShader("shaders/g_buffer.vs", "shaders/g_buffer.fs");
-    Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
-    Shader lightShader("shaders/lightGeometry.vs", "shaders/lightGeometry.fs");
-    Shader lightLightingShader("shaders/lighting.vs", "shaders/lightLighting.fs");
+
+    Shader objGeometryShader("shaders/obj_geometry.vs", "shaders/obj_geometry.fs");
+    Shader lightGeometryShader("shaders/light_geometry.vs", "shaders/light_geometry.fs");
+    Shader phongLightingShader("shaders/lighting.vs", "shaders/phong_lighting.fs");
+    Shader lightLightingShader("shaders/lighting.vs", "shaders/light_lighting.fs");
+
 
     Model zainoMod = Model( "assets/models/backpack/backpack.obj");
 
@@ -108,14 +110,14 @@ int main()
         // ------
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        gBuffer.geometryPass(scene, geometryShader, lightShader);
+        gBuffer.geometryPass(scene, objGeometryShader, lightGeometryShader);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        lightingPass.lightingPass(lightingShader);
-        lightingPass.lightingPass(lightLightingShader);
+        lightingPass.lightingPass(phongLightingShader, lightLightingShader);
+        //lightingPass.lightingPass(phongLightingShader);
+        //lightingPass.lightingPass(lightLightingShader);
 
-        //zaino.Draw(geometryShader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

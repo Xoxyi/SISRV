@@ -1,8 +1,8 @@
 #ifndef SCENE_CLASS_H
 #define SCENE_CLASS_H
 #include <vector>
-#include <object_class.h>
-#include <point_light_class.h>
+#include "object_class.h"
+#include "point_light_class.h"
 
 class Scene {
 public:
@@ -39,18 +39,21 @@ public:
 
 void Scene::DrawPhong(Shader& shader) {
 	for (auto& object : phongObjects) {
-		object.Draw(shader, 0.1f);
+		shader.setFloat("type", .1);
+		object.Draw(shader);
 	}
 }
 
 void Scene::DrawPbr(Shader& shader) {
 	for (auto& object : pbrObjects) {
-		object.Draw(shader, 0.3);
+		shader.setFloat("type", .3);
+		object.Draw(shader);
 	}
 }
 
 void Scene::DrawLight(Shader& shader) {
 	for (auto& light : pointLights) {
+		shader.setFloat("type", .5);
 		light.Draw(shader);
 	}
 }

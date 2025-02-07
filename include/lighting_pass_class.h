@@ -17,11 +17,43 @@ public:
     GBuffer *gBuffer;
     LightingPass(GBuffer *gBuffer);
     void lightingPass(Shader &shader);
+    void lightingPass(Shader &phongShader, Shader &lightShader);
     Model quad;
 
 };
 
 LightingPass::LightingPass(GBuffer *gBuffer) : gBuffer(gBuffer), quad(Model::GenQuad()){}
+
+void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader)
+{
+    phongShader.use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gBuffer->position.id);
+    phongShader.setInt("gPosition", 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, gBuffer->normal.id);
+    phongShader.setInt("gNormal", 1);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, gBuffer->albedo.id);
+    phongShader.setInt("gAlbedo", 2);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, gBuffer->reflection.id);
+    phongShader.setInt("gReflection", 3);
+    phongShader.setVec3("viewPos", camera.Position);
+    quad.Draw(phongShader);
+
+    //
+    //
+
+    lightShader.use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, gBuffer->albedo.id);
+    lightShader.setInt("gAlbedo", 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, gBuffer->reflection.id);
+    lightShader.setInt("gReflection", 1);
+    quad.Draw(lightShader);
+}
 
 
 void LightingPass::lightingPass(Shader &shader)

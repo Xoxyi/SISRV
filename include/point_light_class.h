@@ -1,7 +1,8 @@
 #ifndef POINT_LIGHT_CLASS_H
 #define POINT_LIGHT_CLASS_H
-#include <glm/glm.hpp>
-#include <model_class.h>
+#include "camera_class.h"
+#include "glm/glm.hpp"
+#include "model_class.h"
 	
 class PointLight {
 

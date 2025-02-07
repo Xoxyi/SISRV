@@ -8,7 +8,7 @@
 #include "texture_class.h"
 #include <iostream>
 #include <vector>
-#include <scene_class.h>
+#include "scene_class.h"
 
 class GBuffer
 {
