@@ -17,12 +17,13 @@ public:
     Texture position;
     Texture normal;
     Texture albedo;
-    Texture reflection;     //specular, metalness, roughtness, type
+    Texture reflection;     //specular, metalness, roughtness, ao
     Texture deph;
 
     GBuffer();
 
-    void geometryPass(Scene& scene, Shader &phongShader, Shader& lightShader);
+    void geometryPass(Scene& scene, Shader &phongShader, Shader& lightShader
+    ,Shader& pbrShader);
 
 };
 
@@ -44,12 +45,13 @@ GBuffer::GBuffer() :    buffer(),
     buffer.checkCompleteness();
 }
 
-void GBuffer::geometryPass(Scene& scene, Shader &phongShader, Shader& lightShader)
+void GBuffer::geometryPass(Scene& scene, Shader &phongShader, Shader& lightShader, Shader& pbrShader)
 {
     buffer.enable();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     scene.DrawPhong(phongShader);
     scene.DrawLight(lightShader);
+    scene.DrawPbr(pbrShader);
     buffer.disable();
 }
 

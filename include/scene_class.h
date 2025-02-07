@@ -39,6 +39,7 @@ public:
 
 void Scene::DrawPhong(Shader& shader) {
 	for (auto& object : phongObjects) {
+		shader.use();
 		shader.setFloat("type", .1);
 		object.Draw(shader);
 	}
@@ -46,6 +47,7 @@ void Scene::DrawPhong(Shader& shader) {
 
 void Scene::DrawPbr(Shader& shader) {
 	for (auto& object : pbrObjects) {
+		shader.use();
 		shader.setFloat("type", .3);
 		object.Draw(shader);
 	}
@@ -53,6 +55,7 @@ void Scene::DrawPbr(Shader& shader) {
 
 void Scene::DrawLight(Shader& shader) {
 	for (auto& light : pointLights) {
+		shader.use();
 		shader.setFloat("type", .5);
 		light.Draw(shader);
 	}

@@ -121,6 +121,7 @@ void Mesh::Draw(Shader &shader)
     unsigned int heightNr    = 1;
     unsigned int metalnessNr = 1;
     unsigned int roughnessNr = 1;
+    unsigned int aoNr        = 1;
     for(unsigned int i = 0; i < textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
         // retrieve texture number (the N in diffuse_textureN)
@@ -138,6 +139,8 @@ void Mesh::Draw(Shader &shader)
             number = std::to_string(metalnessNr++);
         else if(name == "texture_roughness")
             number = std::to_string(roughnessNr++);
+        else if(name == "texture_ao")
+            number = std::to_string(aoNr++);
         
          // now set the sampler to the correct texture unit
          glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);

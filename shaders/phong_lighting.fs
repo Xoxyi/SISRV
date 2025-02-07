@@ -31,8 +31,9 @@ void main()
     // retrieve data from gbuffer
     float type = texture(gAlbedo, TexCoords).a;
 
-    if(type >= 0.2)
+    if(type >= 0.2){
         discard;
+    }
 
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
     vec3 Normal = texture(gNormal, TexCoords).rgb;

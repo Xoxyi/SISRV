@@ -7,8 +7,8 @@ uniform sampler2D gAlbedo;
 
 void main() {
 	float type = texture(gAlbedo, TexCoords).a;
-	if(type < 0.4 || type >= 0.6)
+	if(type < 0.1 || type >= 0.6)
 		discard;
 	vec3 color = texture(gAlbedo, TexCoords).rgb;
-	FragColor = vec4(color, 1.0); 
+	FragColor = vec4(1.0, 0.0, 0.0, 1.0); 
 }

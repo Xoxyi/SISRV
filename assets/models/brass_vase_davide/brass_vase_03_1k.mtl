@@ -11,6 +11,6 @@ Ps 0.000000
 Pc 0.000000
 Pcr 0.030000
 map_Kd textures/brass_vase_03_diff_1k.jpg
-map_Pm textures/brass_vase_03_metal_1k.exr
-map_Pr textures/brass_vase_03_rough_1k.exr
-map_Bump -bm 1.000000 textures/brass_vase_03_nor_gl_1k.exr
+map_Pm textures/brass_vase_03_metal_1k.jpg
+map_Pr textures/brass_vase_03_rough_1k.jpg
+map_Bump -bm 1.000000 textures/brass_vase_03_nor_gl_1k.jpg

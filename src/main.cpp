@@ -70,24 +70,31 @@ int main()
     // -------------------------
 
     Shader objGeometryShader("shaders/obj_geometry.vs", "shaders/obj_geometry.fs");
+    Shader pbrGeometryShader("shaders/obj_geometry.vs", "shaders/pbr_geometry.fs");
     Shader lightGeometryShader("shaders/light_geometry.vs", "shaders/light_geometry.fs");
     Shader phongLightingShader("shaders/lighting.vs", "shaders/phong_lighting.fs");
-    //Shader pbrLightingShader("shaders/lighting.vs", "shaders/pbr_lighting.fs");
+    Shader pbrLightingShader("shaders/lighting.vs", "shaders/pbr_lighting.fs");
     Shader lightLightingShader("shaders/lighting.vs", "shaders/light_lighting.fs");
 
 
     Model zainoMod = Model( "assets/models/backpack/backpack.obj");
+    stbi_set_flip_vertically_on_load(false);
+    Model vaseMod = Model("assets/models/brass_vase_davide/brass_vase_03_1k.obj");
 
-    Object zaino = Object{zainoMod, glm::translate(glm::mat4(1), glm::vec3(-2,0,2))};
+    Object zaino = Object{zainoMod, glm::translate(glm::mat4(1), glm::vec3(-2,0,4))};
+    Object vase = Object{vaseMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(-0.5,-0.5,-0.5)), glm::vec3(3.0, 3.0, 3.0))};
 
     std::vector<Object> objects;
     objects.push_back(zaino);
+
+    std::vector<Object> pbrObjects;
+    pbrObjects.push_back(vase);
 
     std::vector<PointLight> pointLights;
     pointLights.emplace_back(glm::vec3(1.0, 1.0, 1.0), glm::vec3(1.0, .7, .0), 1.0f, .0f, .0f);
     pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(1.0, 1.0, 1.0), 1.0f, .0f, .0f);
     
-    Scene scene(objects, objects, pointLights);
+    Scene scene(objects, pbrObjects, pointLights);
 
 
     GBuffer gBuffer = GBuffer();
@@ -111,11 +118,11 @@ int main()
         // ------
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        gBuffer.geometryPass(scene, objGeometryShader, lightGeometryShader);
+        gBuffer.geometryPass(scene, objGeometryShader, lightGeometryShader, pbrGeometryShader);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        lightingPass.lightingPass(phongLightingShader, lightLightingShader);
+        lightingPass.lightingPass(phongLightingShader, lightLightingShader, pbrLightingShader);
         //lightingPass.lightingPass(phongLightingShader);
         //lightingPass.lightingPass(lightLightingShader);
 
