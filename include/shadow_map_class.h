@@ -1,11 +1,11 @@
 #ifndef SHADOW_MAP_H
 #define SHADOW_MAP_H
 
-#include <point_light_class.h>
-#include <cube_map_class.h>
-#include <frame_buffer_class.h>
-#include <scene_class.h>
-#include <camera_class.h>
+#include "point_light_class.h"
+#include "cube_map_class.h"
+#include "frame_buffer_class.h"
+#include "scene_class.h"
+#include "camera_class.h"
 
 class ShadowMap {
 public:
@@ -24,19 +24,16 @@ public:
 };
 
 ShadowMap::ShadowMap(PointLight *light, float shadowWidth, float shadowHeight, float nearPlane, float farPlane) :
-	lightSource(light), depthCubeMap(GL_CLAMP_TO_EDGE, 1024, 1024, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT),
+	lightSource(light), depthCubeMap(GL_CLAMP_TO_EDGE, shadowWidth, shadowHeight, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT),
 	shadowWidth(shadowWidth), shadowHeight(shadowHeight),
 	nearPlane(nearPlane), farPlane(farPlane),
 	depthMapFBO(), depthShader("shaders/point_shadows_depth.vs", "shaders/point_shadows_depth.gs", "shaders/point_shadows_depth.fs") {
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO.ID);
+	depthMapFBO.enable();
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap.id, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	depthMapFBO.disable();
-
-	
-
 }
 
 void ShadowMap::Draw(Scene scene) {

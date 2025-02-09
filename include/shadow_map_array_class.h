@@ -1,5 +1,5 @@
 #include <vector>
-#include <shadow_map_class.h>
+#include "shadow_map_class.h"
 #ifndef SHADOW_MAP_ARRAY_H
 #define SHADOW_MAP_ARRAY_H
 

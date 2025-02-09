@@ -12,9 +12,9 @@
 #include "texture_class.h"
 #include <iostream>
 #include <vector>
-#include <shadow_map_class.h>
+#include "shadow_map_class.h"
 #include <string>
-#include <shadow_map_array_class.h>
+#include "shadow_map_array_class.h"
 
 class LightingPass
 {
@@ -22,14 +22,14 @@ public:
     GBuffer *gBuffer;
     LightingPass(GBuffer *gBuffer);
     void lightingPass(Shader &shader);
-    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps);
+    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps, ShadowMap shadowMap);
     Model quad;
 
 };
 
 LightingPass::LightingPass(GBuffer *gBuffer) : gBuffer(gBuffer), quad(Model::GenQuad()){}
 
-void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps)
+void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps, ShadowMap shadowMap)
 {
     phongShader.use();
     glActiveTexture(GL_TEXTURE0);
@@ -50,8 +50,8 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     phongShader.setInt("irradianceMap", 4);
 
     glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowMaps.ID);
-    phongShader.setInt("depthMaps", 5);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMap.depthCubeMap.id);
+    phongShader.setInt("depthMap", 5);
 
     phongShader.setVec3("viewPos", camera.Position);
     quad.Draw(phongShader);

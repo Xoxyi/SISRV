@@ -87,20 +87,26 @@ int main()
     Model zainoMod = Model( "assets/models/backpack/backpack.obj");
     stbi_set_flip_vertically_on_load(false);
     Model vaseMod = Model("assets/models/brass_vase_davide/brass_vase_03_1k.obj");
+    Model roomMod = Model("assets/models/demo/room/room.obj");
+    Model planeMod = Model("assets/models/demo/plane/plane.obj");
 
     Object zaino = Object{zainoMod, glm::translate(glm::mat4(1), glm::vec3(-2,0,4))};
     Object vase = Object{vaseMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(-0.5,-0.5,-0.5)), glm::vec3(3.0, 3.0, 3.0))};
+    Object room = Object{roomMod, glm::mat4(1.0)};
+    Object plane = Object{planeMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(0,1,0)), glm::vec3(.005))};
 
     std::vector<Object> objects;
-    objects.push_back(zaino);
+    //objects.push_back(zaino);
+    objects.push_back(room);
+    objects.push_back(plane);
 
     std::vector<Object> pbrObjects;
-    pbrObjects.push_back(vase);
+    //pbrObjects.push_back(vase);
 
     std::vector<PointLight> pointLights;
     pointLights.emplace_back(glm::vec3(1.0, 1.0, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
-    pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(5.0, 5.0, 5.0), 1.0f, .0f, .0f);
-    pointLights.emplace_back(glm::vec3(1.0, 1.0, -1.0), glm::vec3(5.0, 3.0, .0), 1.0f, .0f, .0f);
+    //pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(5.0, 5.0, 5.0), 1.0f, .0f, .0f);
+    //pointLights.emplace_back(glm::vec3(1.0, 1.0, -1.0), glm::vec3(5.0, 3.0, .0), 1.0f, .0f, .0f);
 
     std::vector<ShadowMap> shadowMaps;
     for (auto& pointlight: pointLights)
@@ -142,7 +148,7 @@ int main()
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        lightingPass.lightingPass(phongLightingShader, lightLightingShader, pbrLightingShader, skyBox, shadows);
+        lightingPass.lightingPass(phongLightingShader, lightLightingShader, pbrLightingShader, skyBox, shadows, shadowMaps[0]);
 
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -158,7 +164,7 @@ int main()
         skyBoxShader.setMat4("view", camera.GetViewMatrix());
         
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.envMap.id);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[0].depthCubeMap.id);
         Model cube = Model::GenCube();
         cube.Draw(skyBoxShader);
         //lightingPass.lightingPass(phongLightingShader);
