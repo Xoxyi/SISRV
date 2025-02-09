@@ -16,7 +16,7 @@ public:
 
     CubeMap irradianceMap;
 
-    CubeMap speccularMap;
+    CubeMap prefilterMap;
 
     SkyBox(const char *path);
 
@@ -30,7 +30,7 @@ private:
 
 SkyBox::SkyBox(const char *path) :  envMap(GL_CLAMP_TO_EDGE, 512, 512, GL_RGB16F, GL_RGB, GL_FLOAT), 
                                     irradianceMap(GL_CLAMP_TO_EDGE, 32, 32, GL_RGB16F, GL_RGB, GL_FLOAT),
-                                    speccularMap(GL_CLAMP_TO_EDGE, 32, 32, GL_RGB16F, GL_RGB, GL_FLOAT)
+                                    prefilterMap(GL_CLAMP_TO_EDGE, 128, 128, GL_RGB16F, GL_RGB, GL_FLOAT)
 
 {
 
@@ -130,7 +130,52 @@ void SkyBox::genIrradianceMap()
 
 void SkyBox::genSpecularMap()
 {
-    //TODO
+    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    glm::mat4 captureViews[] =
+    {
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+    };
+    Model cube = Model::GenCube();
+
+    Shader prefilterShader("shaders/cubemap.vs", "shaders/prefilter.fs");
+    prefilterShader.use();
+    prefilterShader.setInt("environmentMap", 0);
+    prefilterShader.setMat4("projection", captureProjection);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, envMap.id);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+    FrameBuffer captureBuffer = FrameBuffer();
+    captureBuffer.enable();
+    unsigned int maxMipLevels = 5;
+    for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+    {
+        // reisze framebuffer according to mip-level size.
+        unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        captureBuffer.addDephAttachment(mipWidth, mipHeight);
+        captureBuffer.enable();
+        glViewport(0, 0, mipWidth, mipHeight);
+
+        float roughness = (float)mip / (float)(maxMipLevels - 1);
+        prefilterShader.setFloat("roughness", roughness);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            prefilterShader.setMat4("view", captureViews[i]);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap.id, mip);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            cube.Draw(prefilterShader);
+        }
+    }
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 

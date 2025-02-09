@@ -92,7 +92,7 @@ int main()
     Model planeMod = Model("assets/models/demo/plane/plane.obj");
 
     Object zaino = Object{zainoMod, glm::translate(glm::mat4(1), glm::vec3(-2,0,4))};
-    Object vase = Object{vaseMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(-0.5,-0.5,-0.5)), glm::vec3(3.0, 3.0, 3.0))};
+    Object vase = Object{vaseMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(-0.5,1.0,-0.5)), glm::vec3(3.0, 3.0, 3.0))};
     Object room = Object{roomMod, glm::mat4(1.0)};
     Object plane = Object{planeMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(0,1,0)), glm::vec3(.005))};
 
@@ -102,7 +102,7 @@ int main()
     objects.push_back(plane);
 
     std::vector<Object> pbrObjects;
-    //pbrObjects.push_back(vase);
+    pbrObjects.push_back(vase);
 
     std::vector<PointLight> pointLights;
     pointLights.emplace_back(glm::vec3(1.0, 1.2, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
@@ -167,7 +167,7 @@ int main()
         skyBoxShader.setMat4("view", camera.GetViewMatrix());
         
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.envMap.id);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.prefilterMap.id);
         
         cube.Draw(skyBoxShader);
         //lightingPass.lightingPass(phongLightingShader);

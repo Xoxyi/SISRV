@@ -88,6 +88,12 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
     pbrShader.setInt("irradianceMap", 4);
 
+    for (unsigned int i = 0; i < shadowMaps.size(); ++i) {
+        glActiveTexture(GL_TEXTURE5 + i);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[i].depthCubeMap.id);
+        phongShader.setInt("depthMap[" + std::to_string(i) + "]", 5 + i);
+    }
+
     pbrShader.setVec3("viewPos", camera.Position);
     quad.Draw(pbrShader);
 }
