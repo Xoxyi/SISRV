@@ -10,13 +10,11 @@ uniform sampler2D gAlbedo;
 uniform sampler2D gReflection;
 
 uniform samplerCube irradianceMap;
-uniform samplerCubeArray depthMaps;
 uniform samplerCube depthMap[20];
 
 
 uniform vec3 viewPos;
 float ShadowCalculation(vec3 fragPos);
-float ShadowCalc(vec3 fragPos);
 
 struct Light {          // base alignment   // aligned offset
     vec3 Position;      // 16               // 0
@@ -56,7 +54,7 @@ void main()
 
     vec3 Diffuse = texture(gAlbedo, TexCoords).rgb;
     float Specular = texture(gReflection, TexCoords).r;
-    float shadow = ShadowCalc(FragPos);
+    float shadow = ShadowCalculation(FragPos);
     
     // then calculate lighting as usual
     vec3 lighting  = Diffuse * 0.0; // hard-coded ambient component
@@ -113,31 +111,10 @@ float ShadowCalculation(vec3 fragPos)
     shadow /= float(samples * lightsNumber);
 
     // display closestDepth as debug (to visualize depth cubemap)
-     //FragColor = vec4(vec3(closestDepth / far_plane), 1.0);
-
+     //FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
+        
     return shadow;
 }
 
-float ShadowCalc(vec3 fragPos)
-{
-    float shadow = 0.0;
-    float bias = 0.15;
-    int samples = 20;
-    float viewDistance = length(viewPos - fragPos);
-    float diskRadius = (1.0 + (viewDistance / 25)) / 25.0;
-    for(int j = 0; j < lightsNumber; j++) {
-        vec3 fragToLight = fragPos - lights[j].Position;
-        float currentDepth = length(fragToLight);
-        for(int i = 0; i < samples; ++i)
-        {
-            float closestDepth = texture(depthMap[j], fragToLight + gridSamplingDisk[i] * diskRadius).r;
-            closestDepth *= 25;   // undo mapping [0;1]
-            if(currentDepth - bias > closestDepth)
-                shadow += 1.0;
-        }
-    }
-    shadow /= float(samples * lightsNumber); 
-        
-    return shadow; 
-}
+
 

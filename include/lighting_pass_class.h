@@ -88,10 +88,6 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
     pbrShader.setInt("irradianceMap", 4);
 
-    glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowMaps[0].depthCubeMap.id);
-    pbrShader.setInt("depthMaps", 5);
-
     pbrShader.setVec3("viewPos", camera.Position);
     quad.Draw(pbrShader);
 }

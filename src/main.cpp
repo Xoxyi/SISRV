@@ -105,10 +105,9 @@ int main()
     //pbrObjects.push_back(vase);
 
     std::vector<PointLight> pointLights;
-    pointLights.emplace_back(glm::vec3(1.0, 2.0, .5), glm::vec3(5.0, 3.0, 1.0), 1.0f, .0f, .0f);
-    pointLights.emplace_back(glm::vec3(-.5, 2.0, 1.0), glm::vec3(5.0, 3.0, 1.0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(1.4, 1.8, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
     //pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(5.0, 5.0, 5.0), 1.0f, .0f, .0f);
-    //pointLights.emplace_back(glm::vec3(1.0, 1.0, -1.0), glm::vec3(5.0, 3.0, .0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(0.7, 1.0, 1.0), glm::vec3(7.0, 5.0, 2.0), 1.0f, .0f, .0f);
 
     std::vector<ShadowMap> shadowMaps;
     for (auto& pointlight: pointLights)
