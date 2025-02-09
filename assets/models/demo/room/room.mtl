@@ -1,0 +1,28 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl Poliigon_BrickWallReclaimed_8320_1K
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Poliigon_BrickWallReclaimed_8320_BaseColor.jpg
+map_Ns Poliigon_BrickWallReclaimed_8320_Roughness.jpg
+map_refl Poliigon_BrickWallReclaimed_8320_Metallic.jpg
+map_Bump -bm 1.000000 Poliigon_BrickWallReclaimed_8320_Normal.jpg
+
+newmtl Poliigon_StoneQuartzite_8060_1K
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Poliigon_StoneQuartzite_8060_BaseColor.jpg
+map_Ns Poliigon_StoneQuartzite_8060_Roughness.jpg
+map_refl Poliigon_StoneQuartzite_8060_Metallic.jpg
+map_Bump -bm 1.000000 Poliigon_StoneQuartzite_8060_Normal.jpg
