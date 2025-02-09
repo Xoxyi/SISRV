@@ -88,10 +88,18 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
     pbrShader.setInt("irradianceMap", 4);
 
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.prefilterMap.id);
+    pbrShader.setInt("prefilterMap", 5);
+
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, skyBox.brdfLUTTexture.id);
+    pbrShader.setInt("brdfLUT", 6);
+
     for (unsigned int i = 0; i < shadowMaps.size(); ++i) {
-        glActiveTexture(GL_TEXTURE5 + i);
+        glActiveTexture(GL_TEXTURE7 + i);
         glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[i].depthCubeMap.id);
-        phongShader.setInt("depthMap[" + std::to_string(i) + "]", 5 + i);
+        pbrShader.setInt("depthMap[" + std::to_string(i) + "]", 7 + i);
     }
 
     pbrShader.setVec3("viewPos", camera.Position);

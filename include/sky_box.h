@@ -18,6 +18,8 @@ public:
 
     CubeMap prefilterMap;
 
+    Texture brdfLUTTexture;
+
     SkyBox(const char *path);
 
 private:
@@ -28,9 +30,10 @@ private:
 
 };
 
-SkyBox::SkyBox(const char *path) :  envMap(GL_CLAMP_TO_EDGE, 512, 512, GL_RGB16F, GL_RGB, GL_FLOAT), 
-                                    irradianceMap(GL_CLAMP_TO_EDGE, 32, 32, GL_RGB16F, GL_RGB, GL_FLOAT),
-                                    prefilterMap(GL_CLAMP_TO_EDGE, 128, 128, GL_RGB16F, GL_RGB, GL_FLOAT)
+SkyBox::SkyBox(const char* path) : envMap(GL_CLAMP_TO_EDGE, 512, 512, GL_RGB16F, GL_RGB, GL_FLOAT),
+irradianceMap(GL_CLAMP_TO_EDGE, 32, 32, GL_RGB16F, GL_RGB, GL_FLOAT),
+prefilterMap(GL_CLAMP_TO_EDGE, 128, 128, GL_RGB16F, GL_RGB, GL_FLOAT),
+brdfLUTTexture(512, 512, GL_RG16F, GL_RG, GL_FLOAT, GL_LINEAR)
 
 {
 
@@ -149,7 +152,6 @@ void SkyBox::genSpecularMap()
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, envMap.id);
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
     FrameBuffer captureBuffer = FrameBuffer();
     captureBuffer.enable();
@@ -174,7 +176,21 @@ void SkyBox::genSpecularMap()
             cube.Draw(prefilterShader);
         }
     }
-    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+
+    Shader brdfShader("shaders/lighting.vs", "shaders/brdf.fs");
+    Model quad = Model::GenQuad();
+
+    captureBuffer.addDephAttachment(512, 512);
+    captureBuffer.enable();
+    captureBuffer.addColorAttchment(&brdfLUTTexture, 0);
+    captureBuffer.enable();
+    glViewport(0, 0, 512, 512);
+    brdfShader.use();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    quad.Draw(brdfShader);
+
+
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

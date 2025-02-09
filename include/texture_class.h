@@ -23,7 +23,7 @@ public:
 
     Texture(const char *path, const std::string &directory, std::string type, bool gammaCorrection, int wrapMethod = GL_REPEAT);
 
-    Texture(unsigned int width, unsigned int height, unsigned int internlFormat, unsigned int externalFormat, unsigned int storageType);
+    Texture(unsigned int width, unsigned int height, unsigned int internlFormat, unsigned int externalFormat, unsigned int storageType, unsigned int wrapMethod = GL_NEAREST);
 
     Texture(const char *path, int wrapMethod, int internalFormat, int format, int storageType);
 };
@@ -86,15 +86,17 @@ Texture::Texture(const char *path, const std::string &directory, std::string typ
     this->type=type;
 }
 
-inline Texture::Texture(unsigned int width, unsigned int height, unsigned int internlFormat, unsigned int externalFormat, unsigned int storageType)
+inline Texture::Texture(unsigned int width, unsigned int height, unsigned int internlFormat, unsigned int externalFormat, unsigned int storageType, unsigned int wrapMethod)
 {
     unsigned int textureID;
     // position color buffer
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexImage2D(GL_TEXTURE_2D, 0, internlFormat, width, height, 0, externalFormat, storageType, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, wrapMethod);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, wrapMethod);
     this->id = textureID;
 }
 

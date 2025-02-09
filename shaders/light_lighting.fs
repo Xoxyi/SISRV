@@ -11,6 +11,6 @@ void main() {
 		discard;
 	vec3 color = texture(gAlbedo, TexCoords).rgb;
 
-	vec3 result = vec3(1.0) - exp(-color * 1);
-	FragColor = vec4(result, 1.0); 
+	//vec3 result = vec3(1.0) - exp(-color * 1);
+	FragColor = vec4(color, 1.0); 
 }

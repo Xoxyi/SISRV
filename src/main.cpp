@@ -85,6 +85,7 @@ int main()
     SkyBox skyBox("assets/textures/hdr/newport_loft.hdr");
 
 
+
     Model zainoMod = Model( "assets/models/backpack/backpack.obj");
     stbi_set_flip_vertically_on_load(false);
     Model vaseMod = Model("assets/models/brass_vase_davide/brass_vase_03_1k.obj");
@@ -167,12 +168,11 @@ int main()
         skyBoxShader.setMat4("view", camera.GetViewMatrix());
         
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.prefilterMap.id);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.envMap.id);
         
         cube.Draw(skyBoxShader);
         //lightingPass.lightingPass(phongLightingShader);
         //lightingPass.lightingPass(lightLightingShader);
-
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
