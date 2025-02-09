@@ -24,6 +24,8 @@
 #include <object_class.h>
 #include <g_buffer_class.h>
 #include <point_light_class.h>
+#include <shadow_map_class.h>
+#include <shadow_map_array_class.h>
 
 
 // camera
@@ -99,7 +101,12 @@ int main()
     pointLights.emplace_back(glm::vec3(1.0, 1.0, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
     pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(5.0, 5.0, 5.0), 1.0f, .0f, .0f);
     pointLights.emplace_back(glm::vec3(1.0, 1.0, -1.0), glm::vec3(5.0, 3.0, .0), 1.0f, .0f, .0f);
-    
+
+    std::vector<ShadowMap> shadowMaps;
+    for (auto& pointlight: pointLights)
+    {
+        shadowMaps.emplace_back(&pointlight);
+    }
     Scene scene(objects, pbrObjects, pointLights);
 
 
@@ -122,13 +129,20 @@ int main()
 
         // render
         // ------
+
+        for(ShadowMap& shadowMap: shadowMaps)
+        {
+            shadowMap.Draw(scene);
+        }
+        ShadowMapArray shadows(shadowMaps);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         gBuffer.geometryPass(scene, objGeometryShader, lightGeometryShader, pbrGeometryShader);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        lightingPass.lightingPass(phongLightingShader, lightLightingShader, pbrLightingShader, skyBox);
+        lightingPass.lightingPass(phongLightingShader, lightLightingShader, pbrLightingShader, skyBox, shadows);
 
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -138,7 +152,6 @@ int main()
         0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST
         );
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 
         skyBoxShader.use();
         skyBoxShader.setMat4("projection", camera.GetProjectionMatrix());
@@ -222,8 +235,8 @@ GLFWwindow* glfwInitialize(const char * windowName)
 {
     // glfw: initialize and configure
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 

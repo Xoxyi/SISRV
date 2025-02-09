@@ -12,6 +12,9 @@
 #include "texture_class.h"
 #include <iostream>
 #include <vector>
+#include <shadow_map_class.h>
+#include <string>
+#include <shadow_map_array_class.h>
 
 class LightingPass
 {
@@ -19,14 +22,14 @@ public:
     GBuffer *gBuffer;
     LightingPass(GBuffer *gBuffer);
     void lightingPass(Shader &shader);
-    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox);
+    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps);
     Model quad;
 
 };
 
 LightingPass::LightingPass(GBuffer *gBuffer) : gBuffer(gBuffer), quad(Model::GenQuad()){}
 
-void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox)
+void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps)
 {
     phongShader.use();
     glActiveTexture(GL_TEXTURE0);
@@ -46,6 +49,10 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
     phongShader.setInt("irradianceMap", 4);
 
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowMaps.ID);
+    phongShader.setInt("depthMaps", 5);
+
     phongShader.setVec3("viewPos", camera.Position);
     quad.Draw(phongShader);
 
@@ -57,6 +64,9 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glBindTexture(GL_TEXTURE_2D, gBuffer->albedo.id);
     lightShader.setInt("gAlbedo", 0);
     quad.Draw(lightShader);
+
+    //
+    //
 
     pbrShader.use();
     glActiveTexture(GL_TEXTURE0);
@@ -76,7 +86,11 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
     pbrShader.setInt("irradianceMap", 4);
 
-    phongShader.setVec3("viewPos", camera.Position);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowMaps.ID);
+    pbrShader.setInt("depthMaps", 5);
+
+    pbrShader.setVec3("viewPos", camera.Position);
     quad.Draw(pbrShader);
 }
 
