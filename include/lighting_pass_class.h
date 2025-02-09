@@ -22,14 +22,14 @@ public:
     GBuffer *gBuffer;
     LightingPass(GBuffer *gBuffer);
     void lightingPass(Shader &shader);
-    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps, ShadowMap shadowMap);
+    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, std::vector<ShadowMap>& shadowMaps);
     Model quad;
 
 };
 
 LightingPass::LightingPass(GBuffer *gBuffer) : gBuffer(gBuffer), quad(Model::GenQuad()){}
 
-void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, ShadowMapArray& shadowMaps, ShadowMap shadowMap)
+void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox, std::vector<ShadowMap>& shadowMaps)
 {
     phongShader.use();
     glActiveTexture(GL_TEXTURE0);
@@ -49,9 +49,11 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
     phongShader.setInt("irradianceMap", 4);
 
-    glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMap.depthCubeMap.id);
-    phongShader.setInt("depthMap", 5);
+    for (unsigned int i = 0; i < shadowMaps.size(); ++i) {
+        glActiveTexture(GL_TEXTURE5 + i);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[i].depthCubeMap.id);
+		phongShader.setInt("depthMap[" + std::to_string(i) + "]", 5+i);
+    }
 
     phongShader.setVec3("viewPos", camera.Position);
     quad.Draw(phongShader);
@@ -87,7 +89,7 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     pbrShader.setInt("irradianceMap", 4);
 
     glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowMaps.ID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowMaps[0].depthCubeMap.id);
     pbrShader.setInt("depthMaps", 5);
 
     pbrShader.setVec3("viewPos", camera.Position);
