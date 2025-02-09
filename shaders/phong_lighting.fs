@@ -4,13 +4,15 @@ out vec4 FragColor;
 
 in vec2 TexCoords;
 
+
+
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gReflection;
 
 uniform samplerCube irradianceMap;
-uniform samplerCube depthMap[20];
+uniform samplerCube depthMap[3];
 
 
 uniform vec3 viewPos;
@@ -91,27 +93,83 @@ void main()
 
 float ShadowCalculation(vec3 fragPos)
 {
+    // get vector between fragment position and light position
+    // use the fragment to light vector to sample from the depth map    
+    // float closestDepth = texture(depthMap, fragToLight).r;
+    // it is currently in linear range between [0,1], let's re-transform it back to original depth value
+    // closestDepth *= far_plane;
+    // now get current linear depth as the length between the fragment and light position
+    // test for shadows
+    // float bias = 0.05; // we use a much larger bias since depth is now in [near_plane, far_plane] range
+    // float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
+    // PCF
+    // float shadow = 0.0;
+    // float bias = 0.05; 
+    // float samples = 4.0;
+    // float offset = 0.1;
+    // for(float x = -offset; x < offset; x += offset / (samples * 0.5))
+    // {
+        // for(float y = -offset; y < offset; y += offset / (samples * 0.5))
+        // {
+            // for(float z = -offset; z < offset; z += offset / (samples * 0.5))
+            // {
+                // float closestDepth = texture(depthMap, fragToLight + vec3(x, y, z)).r; // use lightdir to lookup cubemap
+                // closestDepth *= far_plane;   // Undo mapping [0;1]
+                // if(currentDepth - bias > closestDepth)
+                    // shadow += 1.0;
+            // }
+        // }
+    // }
+    // shadow /= (samples * samples * samples);
 
     float shadow = 0.0;
     float bias = 0.15;
     int samples = 20;
     float viewDistance = length(viewPos - fragPos);
-    float diskRadius = (1.0 + (viewDistance / 25.0)) / 25.0;
-    for(int i =0; i < lightsNumber; i++){
-        vec3 fragToLight = fragPos - lights[i].Position;
-        float currentDepth = length(fragToLight);
-        for(int j = 0; j < samples; ++j)
-        {
-            float closestDepth = texture(depthMap[i], vec3(fragToLight + gridSamplingDisk[j] * diskRadius)).r;
-            closestDepth = 25.0;   // undo mapping [0;1]
-            if(currentDepth - bias > closestDepth)
-                shadow += 1.0;
-        }
-    }
-    shadow /= float(samples * lightsNumber);
+    float diskRadius = (1.0 + (viewDistance / 50.0)) / 50.0;
 
+    if(lightsNumber < 1)
+        return shadow;
+
+    vec3 fragToLight0 = fragPos - lights[0].Position;
+    float currentDepth0 = length(fragToLight0);
+    for(int j = 0; j < samples; ++j)
+    {
+        float closestDepth = texture(depthMap[0], vec3(fragToLight0 + gridSamplingDisk[j] * diskRadius)).r;
+        closestDepth *= 50.0;   // undo mapping [0;1]
+        if(currentDepth0 - bias > closestDepth)
+            shadow += 1.0;
+    }
+
+    if(lightsNumber < 2)
+        return shadow / float(samples);
+
+    vec3 fragToLight1 = fragPos - lights[1].Position;
+    float currentDepth1 = length(fragToLight1);
+    for(int j = 0; j < samples; ++j)
+    {
+        float closestDepth = texture(depthMap[1], vec3(fragToLight1 + gridSamplingDisk[j] * diskRadius)).r;
+        closestDepth *= 50.0;   // undo mapping [0;1]
+        if(currentDepth1 - bias > closestDepth)
+            shadow += 1.0;
+    }
+
+    if(lightsNumber < 3)
+        return (shadow / float(samples * 2));
+
+    //vec3 fragToLight2 = fragPos - lights[2].Position;
+    //float currentDepth2 = length(fragToLight2);
+    //for(int j = 0; j < samples; ++j)
+    //{
+    //    float closestDepth = texture(depthMap[2], vec3(fragToLight2 + gridSamplingDisk[j] * diskRadius)).r;
+    //    closestDepth *= 25.0;   // undo mapping [0;1]
+    //    if(currentDepth2 - bias > closestDepth)
+    //        shadow += 1.0;
+    //}
+    shadow /= float(samples);
+        
     // display closestDepth as debug (to visualize depth cubemap)
-     //FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
+    //FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
         
     return shadow;
 }

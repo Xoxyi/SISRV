@@ -19,7 +19,7 @@ public:
 	unsigned int shadowWidth;
 	unsigned int shadowHeight;
 
-	ShadowMap(PointLight *light, float shadowWidth = 1024, float shadowHeight = 1024,  float nearPlane = 1.0f, float farPlane = 25.0f);
+	ShadowMap(PointLight *light, float shadowWidth = 1024, float shadowHeight = 1024,  float nearPlane = 0.5f, float farPlane = 50.0f);
 	void Draw(Scene scene);
 
 };

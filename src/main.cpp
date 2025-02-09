@@ -105,9 +105,9 @@ int main()
     //pbrObjects.push_back(vase);
 
     std::vector<PointLight> pointLights;
-    pointLights.emplace_back(glm::vec3(1.4, 1.8, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(1.0, 1.2, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
     //pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(5.0, 5.0, 5.0), 1.0f, .0f, .0f);
-    pointLights.emplace_back(glm::vec3(0.7, 1.0, 1.0), glm::vec3(7.0, 5.0, 2.0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(0.0, 3.0, 0.0), glm::vec3(7.0, 5.0, 2.0), 1.0f, .0f, .0f);
 
     std::vector<ShadowMap> shadowMaps;
     for (auto& pointlight: pointLights)
@@ -198,7 +198,7 @@ void eightMove(Scene *scene)
 
     float dir = std::atan2(vx,vz);
 
-    glm::mat4 transform = glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,.5,z)), glm::vec3(0.005)), dir, glm::vec3(0,1,0));
+    glm::mat4 transform = glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,1.1,z)), glm::vec3(0.005)), dir, glm::vec3(0,1,0));
     scene->phongObjects[1].transform = transform;    
 }
 
