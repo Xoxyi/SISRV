@@ -145,7 +145,7 @@ int main()
         skyBoxShader.setMat4("view", camera.GetViewMatrix());
         
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.cubeMap.id);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.envMap.id);
         Model cube = Model::GenCube();
         cube.Draw(skyBoxShader);
         //lightingPass.lightingPass(phongLightingShader);
