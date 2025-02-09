@@ -54,7 +54,7 @@ void ShadowMap::Draw(Scene scene) {
 		depthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 	depthShader.setFloat("far_plane", farPlane);
 	depthShader.setVec3("lightPos", lightSource->position);
-	scene.DrawPbr(depthShader);
+	scene.DrawPhong(depthShader);
 	scene.DrawPbr(depthShader);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
