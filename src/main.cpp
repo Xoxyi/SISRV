@@ -1,8 +1,10 @@
+#include "cube_map_class.h"
 #include "frame_buffer_class.h"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
 #include "lighting_pass_class.h"
+#include "sky_box.h"
 #include <cstdio>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,6 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <ostream>
 #include <shader_class.h>
 #include <camera_class.h>
 #include <model_class.h>
@@ -75,6 +78,8 @@ int main()
     Shader phongLightingShader("shaders/lighting.vs", "shaders/phong_lighting.fs");
     Shader pbrLightingShader("shaders/lighting.vs", "shaders/pbr_lighting.fs");
     Shader lightLightingShader("shaders/lighting.vs", "shaders/light_lighting.fs");
+    Shader skyBoxShader("shaders/sky_box.vs", "shaders/sky_box.fs");
+    SkyBox skyBox("assets/textures/hdr/newport_loft.hdr");
 
 
     Model zainoMod = Model( "assets/models/backpack/backpack.obj");
@@ -91,8 +96,9 @@ int main()
     pbrObjects.push_back(vase);
 
     std::vector<PointLight> pointLights;
-    pointLights.emplace_back(glm::vec3(1.0, 1.0, 1.0), glm::vec3(1.0, .7, .0), 1.0f, .0f, .0f);
-    pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(1.0, 1.0, 1.0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(1.0, 1.0, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(-1.0, 1.0, -1.0), glm::vec3(5.0, 5.0, 5.0), 1.0f, .0f, .0f);
+    pointLights.emplace_back(glm::vec3(1.0, 1.0, -1.0), glm::vec3(5.0, 3.0, .0), 1.0f, .0f, .0f);
     
     Scene scene(objects, pbrObjects, pointLights);
 
@@ -122,7 +128,26 @@ int main()
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        lightingPass.lightingPass(phongLightingShader, lightLightingShader, pbrLightingShader);
+        lightingPass.lightingPass(phongLightingShader, lightLightingShader, pbrLightingShader, skyBox);
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.buffer.ID);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+        glBlitFramebuffer(
+        0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST
+        );
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+        skyBoxShader.use();
+        skyBoxShader.setMat4("projection", camera.GetProjectionMatrix());
+        skyBoxShader.setMat4("view", camera.GetViewMatrix());
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.cubeMap.id);
+        Model cube = Model::GenCube();
+        cube.Draw(skyBoxShader);
         //lightingPass.lightingPass(phongLightingShader);
         //lightingPass.lightingPass(lightLightingShader);
 

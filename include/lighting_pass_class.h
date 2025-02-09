@@ -2,11 +2,13 @@
 #define LIGHTING_PASS_H
 
 #include "camera_class.h"
+#include "cube_map_class.h"
 #include "frame_buffer_class.h"
 #include "g_buffer_class.h"
 #include "model_class.h"
 #include "object_class.h"
 #include "shader_class.h"
+#include "sky_box.h"
 #include "texture_class.h"
 #include <iostream>
 #include <vector>
@@ -17,14 +19,14 @@ public:
     GBuffer *gBuffer;
     LightingPass(GBuffer *gBuffer);
     void lightingPass(Shader &shader);
-    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader);
+    void lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox);
     Model quad;
 
 };
 
 LightingPass::LightingPass(GBuffer *gBuffer) : gBuffer(gBuffer), quad(Model::GenQuad()){}
 
-void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader)
+void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader& pbrShader, SkyBox skyBox)
 {
     phongShader.use();
     glActiveTexture(GL_TEXTURE0);
@@ -39,6 +41,11 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, gBuffer->reflection.id);
     phongShader.setInt("gReflection", 3);
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
+    phongShader.setInt("irradianceMap", 4);
+
     phongShader.setVec3("viewPos", camera.Position);
     quad.Draw(phongShader);
 
@@ -64,6 +71,11 @@ void LightingPass::lightingPass(Shader &phongShader, Shader &lightShader, Shader
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, gBuffer->reflection.id);
     pbrShader.setInt("gReflection", 3);
+
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.irradianceMap.id);
+    pbrShader.setInt("irradianceMap", 4);
+
     phongShader.setVec3("viewPos", camera.Position);
     quad.Draw(pbrShader);
 }

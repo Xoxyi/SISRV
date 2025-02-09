@@ -8,6 +8,8 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gReflection;
 
+uniform samplerCube irradianceMap;
+
 // lights
 struct Light {          // base alignment   // aligned offset
     vec3 Position;      // 16               // 0
@@ -79,14 +81,21 @@ void main()
         float NdotL = max(dot(N, L), 0.0);                
         Lo += (kD * albedo / PI + specular) * radiance * NdotL; 
     }   
+
+    vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	
   
-    vec3 ambient = vec3(0.03) * albedo;
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse      = irradiance * albedo;
+    vec3 ambient = (kD * diffuse);
+    //vec3 ambient = vec3(0.03) * albedo;
     vec3 color = ambient + Lo;
 	
-    //color = color / (color + vec3(1.0));
-    //color = pow(color, vec3(1.0/2.2));  
-   
-    FragColor = vec4(color, 1.0);
+
+    vec3 result = vec3(1.0) - exp(-color * 2);
+
+    FragColor = vec4(result, 1.0);
 }  
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)

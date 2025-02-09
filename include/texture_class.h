@@ -24,6 +24,8 @@ public:
     Texture(const char *path, const std::string &directory, std::string type, bool gammaCorrection, int wrapMethod = GL_REPEAT);
 
     Texture(unsigned int width, unsigned int height, unsigned int internlFormat, unsigned int externalFormat, unsigned int storageType);
+
+    Texture(const char *path, int wrapMethod, int internalFormat, int format, int storageType);
 };
 
 
@@ -94,6 +96,37 @@ inline Texture::Texture(unsigned int width, unsigned int height, unsigned int in
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     this->id = textureID;
+}
+
+Texture::Texture(const char *path, int wrapMethod, int internalFormat, int format, int storageType) : path(path)
+{
+    std::cout << __FILE__ << " " << __func__ << " " << __LINE__ << std::endl;
+    unsigned int textureID;
+    int width, height, nrComponents;
+
+    std::string filename = std::string(path);
+
+    float *data = stbi_loadf(filename.c_str(), &width, &height, &nrComponents, 0);
+    std::cout << __FILE__ << " " << __func__ << " " << __LINE__ << std::endl;
+    if (data) {
+        glGenTextures(1, &textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        std::cout << __FILE__ << " " << __func__ << " " << __LINE__ << std::endl;
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, storageType, data);
+        std::cout << __FILE__ << " " << __func__ << " " << __LINE__ << std::endl;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMethod);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMethod);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else {
+        std::cerr << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+    this->id = textureID;
+    std::cout << __FILE__ << " " << __func__ << " " << __LINE__ << std::endl;
 }
 
 #endif

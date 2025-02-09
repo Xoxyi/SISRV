@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include "cube_map_class.h"
 #include "texture_class.h"
 #include <map>
 #include "camera_class.h"
@@ -20,8 +21,9 @@ public:
 	FrameBuffer(Texture* colorBuffer);
 	FrameBuffer();
 
-	void addColorAttchment(Texture *colorBuffer, unsigned int index);
+	void addColorAttchment(Texture *colorBuffer, unsigned int index, int texTarget = GL_TEXTURE_2D);
 	void addDepthAttahcment(Texture *depthBuffer);
+	void addDephAttachment(int width = SCR_WIDTH, int height = SCR_HEIGHT);
 	void addStencilAttachment();
 	void updateAttachment(std::vector<unsigned int> indices);
 	int checkCompleteness();
@@ -65,13 +67,14 @@ FrameBuffer::FrameBuffer(Texture *colorBuffer) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::addColorAttchment(Texture *colorBuffer, unsigned int index) {
+void FrameBuffer::addColorAttchment(Texture *colorBuffer, unsigned int index, int texTarget) {
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
 	unsigned int attachment = GL_COLOR_ATTACHMENT0 + index;
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, colorBuffer->id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texTarget, colorBuffer->id, 0);
 	textureAttachments[attachment] = colorBuffer;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
 
 /*void FrameBuffer::addDepthAttahcment(Texture *depthBuffer) {
 	glBindFramebuffer(GL_FRAMEBUFFER, ID);
@@ -87,6 +90,18 @@ void FrameBuffer::addDepthAttahcment(Texture *depthBuffer) {
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FrameBuffer::addDephAttachment(int width, int height) {
+	glBindFramebuffer(GL_FRAMEBUFFER, ID);
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	renderBufferAttachments[GL_DEPTH_ATTACHMENT] = rboDepth;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

@@ -9,6 +9,8 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gReflection;
 
+uniform samplerCube irradianceMap;
+
 uniform vec3 viewPos;
 
 struct Light {          // base alignment   // aligned offset
@@ -36,12 +38,13 @@ void main()
     }
 
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
-    vec3 Normal = texture(gNormal, TexCoords).rgb;
+    vec3 Normal = normalize(texture(gNormal, TexCoords).rgb);
+
     vec3 Diffuse = texture(gAlbedo, TexCoords).rgb;
     float Specular = texture(gReflection, TexCoords).r;
     
     // then calculate lighting as usual
-    vec3 lighting  = Diffuse * 0.1; // hard-coded ambient component
+    vec3 lighting  = Diffuse * 0.0; // hard-coded ambient component
     vec3 viewDir  = normalize(viewPos - FragPos);
     for(int i = 0; i < lightsNumber; ++i)
     {
@@ -60,6 +63,16 @@ void main()
         specular *= attenuation;
         lighting += diffuse + specular;
     }
-   FragColor = vec4(lighting, 1.0);
+
+    //vec3 kS = fresnelSchlick(max(dot(N, V), 0.0), F0);
+  
+    vec3 irradiance = texture(irradianceMap, Normal).rgb;
+    vec3 diffuse      = irradiance * Diffuse;
+    vec3 ambient = (1 * diffuse);
+
+    lighting += ambient;
+
+    vec3 result = vec3(1.0) - exp(-lighting * .7);
+    FragColor = vec4(result, 1.0);
 }
 
