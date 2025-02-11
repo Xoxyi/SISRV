@@ -15,27 +15,33 @@ public:
 		pbrObjects(pbrObjects),
 		pointLights(pointLights) {
 
-		unsigned int uboLightBlock;
-		glGenBuffers(1, &uboLightBlock);
-		glBindBuffer(GL_UNIFORM_BUFFER, uboLightBlock);
-		glBufferData(GL_UNIFORM_BUFFER, 964, NULL, GL_STATIC_DRAW); // allocate 152 bytes of memory
-		for (int i = 0; i < pointLights.size(); ++i) {
-			glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 0, sizeof(glm::vec3), glm::value_ptr(pointLights[i].position));
-			glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 16, sizeof(glm::vec3), glm::value_ptr(pointLights[i].color));
-			glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 32, sizeof(float), &pointLights[i].constant);
-			glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 36, sizeof(float), &pointLights[i].linear);
-			glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 40, sizeof(float), &pointLights[i].quadratic);
-		}
-		int n = pointLights.size();
-		glBufferSubData(GL_UNIFORM_BUFFER, 960, sizeof(int), &n);
-		glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLightBlock);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	
 	}
 
+
+	void update();
 	void DrawPhong(Shader& shader);
 	void DrawPbr(Shader& shader);
 	void DrawLight(Shader& shader);
 };
+
+void Scene::update() {
+	unsigned int uboLightBlock;
+	glGenBuffers(1, &uboLightBlock);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLightBlock);
+	glBufferData(GL_UNIFORM_BUFFER, 964, NULL, GL_STATIC_DRAW); // allocate 152 bytes of memory
+	for (int i = 0; i < pointLights.size(); ++i) {
+		glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 0, sizeof(glm::vec3), glm::value_ptr(pointLights[i].position));
+		glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 16, sizeof(glm::vec3), glm::value_ptr(pointLights[i].color));
+		glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 32, sizeof(float), &pointLights[i].constant);
+		glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 36, sizeof(float), &pointLights[i].linear);
+		glBufferSubData(GL_UNIFORM_BUFFER, 48 * i + 40, sizeof(float), &pointLights[i].quadratic);
+	}
+	int n = pointLights.size();
+	glBufferSubData(GL_UNIFORM_BUFFER, 960, sizeof(int), &n);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLightBlock);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
 
 void Scene::DrawPhong(Shader& shader) {
 	for (auto& object : phongObjects) {

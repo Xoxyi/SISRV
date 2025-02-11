@@ -113,7 +113,7 @@ void main()
 
     vec3 ambient = (kD * diffuse + specular);
     //vec3 ambient = vec3(0.03) * albedo;
-    vec3 color = ambient * (1.0 - shadow) + Lo;
+    vec3 color = (ambient + Lo) * (1.0 - shadow);
 	
     color = color / (color + vec3(1.0));
     //vec3 result = vec3(1.0) - exp(-color * 2);
@@ -241,7 +241,7 @@ float ShadowCalculation(vec3 fragPos)
     //    if(currentDepth2 - bias > closestDepth)
     //        shadow += 1.0;
     //}
-    shadow /= float(samples);
+    shadow /= float(samples * 3);
         
     // display closestDepth as debug (to visualize depth cubemap)
     //FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
