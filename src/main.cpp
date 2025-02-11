@@ -91,11 +91,14 @@ int main()
     Model vaseMod = Model("assets/models/brass_vase_davide/brass_vase_03_1k.obj");
     Model roomMod = Model("assets/models/demo/room/room.obj");
     Model planeMod = Model("assets/models/demo/plane/plane.obj");
+    Model ufoMod = Model("assets/models/demo/ufo/ufo.obj");
+    
 
     Object zaino = Object{zainoMod, glm::translate(glm::mat4(1), glm::vec3(-2,0,4))};
-    Object vase = Object{vaseMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(-0.5,1.0,-0.5)), glm::vec3(3.0, 3.0, 3.0))};
+    Object vase = Object{vaseMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(-0.5,0.025,-0.5)), glm::vec3(3.0, 3.0, 3.0))};
     Object room = Object{roomMod, glm::mat4(1.0)};
     Object plane = Object{planeMod, glm::scale(glm::translate(glm::mat4(1), glm::vec3(0,1,0)), glm::vec3(.005))};
+    Object ufo = Object{ufoMod, glm::mat4(1.0)};
 
     std::vector<Object> objects;
     //objects.push_back(zaino);
@@ -104,6 +107,7 @@ int main()
 
     std::vector<Object> pbrObjects;
     pbrObjects.push_back(vase);
+ //   pbrObjects.push_back(ufo);
 
     std::vector<PointLight> pointLights;
     pointLights.emplace_back(glm::vec3(1.0, 1.2, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
@@ -198,8 +202,22 @@ void eightMove(Scene *scene)
 
     float dir = std::atan2(vx,vz);
 
-    glm::mat4 transform = glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,1.1,z)), glm::vec3(0.005)), dir, glm::vec3(0,1,0));
-    scene->phongObjects[1].transform = transform;    
+    glm::mat4 transform = glm::rotate(glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,1.1,z)), glm::vec3(0.005)), (float)(sin(2*time)*.4), glm::vec3(vx,0,vz)), dir, glm::vec3(0,1,0));
+    scene->phongObjects[1].transform = transform;
+
+
+    time = time + 1;
+    angularVel = 1;
+    x = radius*sin(time * angularVel);
+    z = radius * sin(time * angularVel) * cos(time * angularVel);
+
+    vx = radius * cos(time * angularVel);
+    vz = radius * (cos(time * angularVel) * cos(time * angularVel) - sin(time * angularVel) * sin(time * angularVel));
+
+    dir = std::atan2(vx,vz);
+
+    transform = glm::rotate(glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,1.1,z)), glm::vec3(0.005)), (float)(sin(2*time)*.4), glm::vec3(vx,0,vz)), dir, glm::vec3(0,1,0));
+    scene->pbrObjects[1].transform = transform;
 }
 
 void processInput(GLFWwindow *window)
@@ -208,15 +226,19 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    int mod = 1;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        mod = 3;
+
     //WASD pressed
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.ProcessKeyboard(FORWARD, deltaTime, mod);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.ProcessKeyboard(BACKWARD, deltaTime, mod);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(LEFT, deltaTime, mod);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.ProcessKeyboard(RIGHT, deltaTime, mod);
 
     
 }

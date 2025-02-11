@@ -1,0 +1,16 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl UFO
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+map_Kd UFOAlbedo.png
+map_Pm UFOMetal.png
+map_Pr UFORough.png
+map_Bump -bm 0.300000 UFONormal.png
