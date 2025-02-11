@@ -226,9 +226,9 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    int mod = 1;
+    int mod = .3;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        mod = 3;
+        mod = 1;
 
     //WASD pressed
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)

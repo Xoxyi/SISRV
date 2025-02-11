@@ -24,7 +24,7 @@ public:
 		shader.use();
 		shader.setMat4("view", camera.GetViewMatrix());
 		shader.setMat4("projection", camera.GetProjectionMatrix());
-		shader.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0), position), glm::vec3(0.2, 0.2, 0.2)));
+		shader.setMat4("model", glm::scale(glm::translate(glm::mat4(1.0), position), glm::vec3(0.2)));
 		shader.setVec3("color", color);
 		shader.setFloat("type", 0.5);
 		model.Draw(shader);

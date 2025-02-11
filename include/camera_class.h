@@ -54,7 +54,7 @@ public:
     glm::mat4 GetProjectionMatrix();
 
     // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime, int mod);
+    void ProcessKeyboard(Camera_Movement direction, float deltaTime, float mod);
 
     // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
@@ -96,7 +96,7 @@ inline glm::mat4 Camera::GetProjectionMatrix()
     return glm::mat4(glm::perspective(glm::radians(Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f));
 }
 
-void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime, int mod) 
+void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime, float mod) 
 {
     float velocity = MovementSpeed * deltaTime * mod;
     if (direction == FORWARD)
