@@ -107,7 +107,7 @@ int main()
 
     std::vector<Object> pbrObjects;
     pbrObjects.push_back(vase);
- //   pbrObjects.push_back(ufo);
+    pbrObjects.push_back(ufo);
 
     std::vector<PointLight> pointLights;
     pointLights.emplace_back(glm::vec3(1.0, 1.2, 1.0), glm::vec3(10.0, 7.0, 2.0), 1.0f, .0f, .0f);
@@ -206,7 +206,7 @@ void eightMove(Scene *scene)
     scene->phongObjects[1].transform = transform;
 
 
-    time = time + 1;
+    time = time + 1.2;
     angularVel = 1;
     x = radius*sin(time * angularVel);
     z = radius * sin(time * angularVel) * cos(time * angularVel);
@@ -216,7 +216,7 @@ void eightMove(Scene *scene)
 
     dir = std::atan2(vx,vz);
 
-    transform = glm::rotate(glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,1.1,z)), glm::vec3(0.005)), (float)(sin(2*time)*.4), glm::vec3(vx,0,vz)), dir, glm::vec3(0,1,0));
+    transform = glm::rotate(glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,1.1,z)), glm::vec3(0.2)), (float)(sin(2*time)*.4), glm::vec3(vx,0,vz)), dir, glm::vec3(0,1,0));
     scene->pbrObjects[1].transform = transform;
 }
 
