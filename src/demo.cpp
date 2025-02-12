@@ -32,13 +32,13 @@
 
 std::vector<Model> models;
 
-void eightMove(Scene *scene);
+void eightMove(Scene* scene);
 
-void moveLight(Scene *scene, GLFWwindow* window, int index);
+void moveLight(Scene* scene, GLFWwindow* window, int index);
 
 
 int main()
-{    
+{
     GLFWwindow* window = glfwInitialize("Learn OpenGL");
 
     gladInitialize();
@@ -47,7 +47,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    
+
     // build and compile shaders
     // -------------------------
     Shader objGeometryShader("shaders/obj_geometry.vs", "shaders/obj_geometry.fs");
@@ -66,21 +66,21 @@ int main()
     // load model
     // ----------
     models.emplace_back("assets/models/demo/env/env.obj");
-    models.emplace_back("assets/models/demo/plane/plane.obj");    
-    
+    models.emplace_back("assets/models/demo/plane/plane.obj");
+
     // set object initial transform
     // ----------------------------
-    Object env = Object{models[0], glm::scale(glm::mat4(1), glm::vec3(.3, .3, .3))};
-    Object plane = Object{models[1], glm::scale(glm::translate(glm::mat4(1), glm::vec3(0,1,0)), glm::vec3(.005))};
+    Object env = Object{ models[0], glm::scale(glm::mat4(1), glm::vec3(.3, .3, .3)) };
+    Object plane = Object{ models[1], glm::scale(glm::translate(glm::mat4(1), glm::vec3(0,1,0)), glm::vec3(.005)) };
 
     // insert oobjects in appropriate vector
     // -------------------------------------
     std::vector<Object> objects;
     objects.push_back(plane);
-    
+
     std::vector<Object> pbrObjects;
     pbrObjects.push_back(env);
-    
+
     // set light and light position
     // ----------------------------
     std::vector<PointLight> pointLights;
@@ -92,16 +92,16 @@ int main()
 
 
     std::vector<ShadowMap> shadowMaps;
-    
-        
-    for (auto& pointlight: scene.pointLights)
+
+
+    for (auto& pointlight : scene.pointLights)
     {
         shadowMaps.emplace_back(&pointlight);
     }
 
     GBuffer gBuffer = GBuffer();
     LightingPass lightingPass = LightingPass(&gBuffer);
-    
+
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     Model cube = Model::GenCube();
@@ -112,6 +112,7 @@ int main()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        scene.update();
 
         // input
         // -----
@@ -120,7 +121,7 @@ int main()
         // render
         // ------
         //eightMove(&scene);
-        for(ShadowMap& shadowMap: shadowMaps)
+        for (ShadowMap& shadowMap : shadowMaps)
         {
             shadowMap.Draw(scene);
         }
@@ -135,7 +136,7 @@ int main()
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.buffer.ID);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
         glBlitFramebuffer(
-        0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST
+            0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST
         );
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         skyBoxShader.use();
@@ -160,40 +161,47 @@ int main()
 }
 
 
-void moveLight(Scene *scene, GLFWwindow* window, int index)
+void moveLight(Scene* scene, GLFWwindow* window, int index)
 {
+    index = 0;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+        index = 1;
+
+    
     //WASD pressed
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0,.1,0);
+        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0, .1, 0);
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0,-.1,0);
+        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0, -.1, 0);
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(-.1,0,0);
+        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(-.1, 0, 0);
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(.1,0,0);
+        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(.1, 0, 0);
     if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS)
-        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0,0,-.1);
+        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0, 0, -.1);
     if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS)
-        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0,0,.1);
+        scene->pointLights[index].position = scene->pointLights[index].position + glm::vec3(0, 0, .1);
+
+    
 
     std::cout << scene->pointLights[index].position.x << std::endl;
     std::cout << scene->pointLights[index].position.y << std::endl;
     std::cout << scene->pointLights[index].position.z << std::endl;
 }
 
-void eightMove(Scene *scene)
+void eightMove(Scene* scene)
 {
     float radius = .5;
     float time = glfwGetTime();
     float angularVel = 1;
-    float x = radius*sin(time * angularVel);
+    float x = radius * sin(time * angularVel);
     float z = radius * sin(time * angularVel) * cos(time * angularVel);
 
     float vx = radius * cos(time * angularVel);
     float vz = radius * (cos(time * angularVel) * cos(time * angularVel) - sin(time * angularVel) * sin(time * angularVel));
 
-    float dir = std::atan2(vx,vz);
+    float dir = std::atan2(vx, vz);
 
-    glm::mat4 transform = glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x,1.1,z)), glm::vec3(0.005)), dir, glm::vec3(0,1,0));
-    scene->phongObjects[1].transform = transform;    
+    glm::mat4 transform = glm::rotate(glm::scale(glm::translate(glm::mat4(1), glm::vec3(x, 1.1, z)), glm::vec3(0.005)), dir, glm::vec3(0, 1, 0));
+    scene->phongObjects[1].transform = transform;
 }
